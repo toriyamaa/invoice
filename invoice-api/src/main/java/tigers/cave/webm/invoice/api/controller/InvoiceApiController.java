@@ -20,7 +20,6 @@ import tigers.cave.webm.invoice.api.resource.InvoiceListResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResultResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceResource;
-import tigers.cave.webm.invoice.api.resource.OrderResource;
 import tigers.cave.webm.invoice.api.service.InvoiceService;
 import tigers.cave.webm.invoice.dao.model.Invoice;
 
@@ -35,12 +34,6 @@ public class InvoiceApiController {
 	/** The invoice service. */
 	@Autowired
 	InvoiceService invoiceService;
-
-//	@RequestMapping(method = RequestMethod.GET)
-//	public String searchInvoices(UriComponentsBuilder uriBuilder) {
-//		return "test";
-//	}
-
 
 	/**
 	 * Search invoices.
@@ -100,7 +93,8 @@ public class InvoiceApiController {
 		InvoiceListResource invoiceListResource = new InvoiceListResource();
 
 		//TODO
-		invoiceListResource.setInvoicesMaxCount("2");
+		invoiceListResource.setInvoicesMaxCount(
+				String.valueOf(invoiceResourceList.size()));
 		invoiceListResource.setStart("1");
 
 		invoiceListResource.setInvoicesCount(
@@ -119,20 +113,53 @@ public class InvoiceApiController {
 	@RequestMapping(path = "{invoiceNo}", method = RequestMethod.GET)
 	public InvoiceDetailResource getInvoice(@PathVariable String invoiceNo) {
 
+
 		//TODO　以下実装修正する
-		invoiceService.findInvoice(invoiceNo);
+		InvoiceDetailResource invoiceDetailResource = invoiceService.findInvoice(invoiceNo);
 
-		OrderResource orderResource = new OrderResource();
-
-		List<OrderResource> orderResourceList = new ArrayList<OrderResource>();
-		orderResourceList.add(orderResource);
-		orderResourceList.add(orderResource);
-
-		InvoiceDetailResource invoiceDetailResource = new InvoiceDetailResource();
-		invoiceDetailResource.setInvoiceNo(invoiceNo);
-		invoiceDetailResource.setOrdersCount(
-				String.valueOf(orderResourceList.size()));
-		invoiceDetailResource.setOrders(orderResourceList);
+		//TODO
+//		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//
+//		OrderResource orderResource = new OrderResource();
+//
+//		List<OrderResource> orderResourceList = new ArrayList<OrderResource>();
+//		orderResourceList.add(orderResource);
+//		orderResourceList.add(orderResource);
+//
+//		InvoiceDetailResource invoiceDetailResource = new InvoiceDetailResource();
+//		invoiceDetailResource.setInvoiceNo(invoiceNo);
+//		invoiceDetailResource.setClientNo(String.valueOf(invoice.getClientTbl().getClientNo()));
+//		invoiceDetailResource.setClientChargeName(
+//				invoice.getClientTbl().getClientChargeLastName()
+//						+ invoice.getClientTbl().getClientChargeFirstName());
+//		invoiceDetailResource.setClientName(invoice.getClientTbl().getClientName());
+//		invoiceDetailResource.setClientAddress(invoice.getClientTbl().getClientAddress());
+//		invoiceDetailResource.setClientTel(invoice.getClientTbl().getClientTel());
+//		invoiceDetailResource.setClientFax(invoice.getClientTbl().getClientFax());
+//		invoiceDetailResource.setInvoiceStatusCode(invoice.getInvoiceStatus());
+//		//TODO
+//		invoiceDetailResource.setInvoiceStatus("新規作成");
+//		invoiceDetailResource.setInvoiceCreateDate(
+//				simpleDateFormat.format(invoice.getInvoiceCreateDate()));
+//		invoiceDetailResource.setInvoiceTitle(invoice.getInvoiceTitle());
+//		invoiceDetailResource.setInvoiceAmt(String.valueOf(invoice.getInvoiceAmt()));
+//		invoiceDetailResource.setTaxAmt(String.valueOf(invoice.getTaxAmt()));
+//		invoiceDetailResource.setInvoiceStartDate(
+//				simpleDateFormat.format(invoice.getInvoiceStartDate()));
+//		invoiceDetailResource.setInvoiceEndDate(
+//				simpleDateFormat.format(invoice.getInvoiceEndDate()));
+//		invoiceDetailResource.setInvoiceNote(invoice.getInvoiceNote());
+//		invoiceDetailResource.setCreateUser(invoice.getCreateUser());
+//		invoiceDetailResource.setCreateDatetime(
+//				simpleDateFormat.format(invoice.getCreateDatetime()));
+//		invoiceDetailResource.setUpdateUser(invoice.getUpdateUser());
+//		invoiceDetailResource.setUpdateDatetime(
+//				simpleDateFormat.format(invoice.getUpdateDatetime()));
+//
+//
+//		invoiceDetailResource.setOrdersCount(
+//				String.valueOf(orderResourceList.size()));
+//		invoiceDetailResource.setOrders(orderResourceList);
 
 		return invoiceDetailResource;
 	}
@@ -145,11 +172,17 @@ public class InvoiceApiController {
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public InvoiceRegistrationResultResource createInvoice(
-			@Validated @RequestBody InvoiceRegistrationResource newInvoice) {
+			@Validated @RequestBody InvoiceRegistrationResource newInvoice,
+			UriComponentsBuilder uriBuilder) {
 
-		invoiceService.createInvoice();
+		InvoiceRegistrationResultResource invoiceRegistrationResultResource = invoiceService.createInvoice(newInvoice);
 
-		InvoiceRegistrationResultResource invoiceRegistrationResultResource = new InvoiceRegistrationResultResource();
+		URI resourceUri = MvcUriComponentsBuilder.relativeTo(uriBuilder)
+				.withMethodCall
+						(MvcUriComponentsBuilder.on(InvoiceApiController.class).getInvoice(invoiceRegistrationResultResource.getInvoiceNo()))
+				.build().encode().toUri();
+
+		invoiceRegistrationResultResource.setUrl(resourceUri.toString());
 
 		return invoiceRegistrationResultResource;
 	}

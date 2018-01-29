@@ -24,6 +24,7 @@ import javax.persistence.TemporalType;
 @Table(name="invoice_tbl")
 @NamedQuery(name="Invoice.findAll", query="SELECT i FROM Invoice i")
 public class Invoice implements Serializable {
+
 	private static final long serialVersionUID = 1L;
 
 	@Id

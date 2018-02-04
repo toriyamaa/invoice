@@ -11,6 +11,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,6 +22,7 @@ import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResultResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceResource;
 import tigers.cave.webm.invoice.api.resource.OrderResource;
+import tigers.cave.webm.invoice.api.resource.query.InvoiceListResourceQuery;
 import tigers.cave.webm.invoice.dao.model.Client;
 import tigers.cave.webm.invoice.dao.model.Invoice;
 import tigers.cave.webm.invoice.dao.model.Order;
@@ -120,8 +122,47 @@ public class InvoiceService {
 	}
 
 	@Transactional(readOnly = true)
-	public InvoiceListResource findAllInvoicesByCriteria(InvoiceCriteria invoiceCriteria,
+	public InvoiceListResource findAllInvoicesByCriteria(InvoiceListResourceQuery invoiceListResourceQuery,
 			UriComponentsBuilder uriBuilder) {
+
+		//TODO 設定処理　serviceに移す？
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		InvoiceCriteria invoiceCriteria = new InvoiceCriteria();
+
+		try {
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getStart())) {
+				invoiceCriteria.setStart(Integer.parseInt(invoiceListResourceQuery.getStart())-1);
+			}
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getMaxCount())) {
+				invoiceCriteria.setMaxCount(Integer.parseInt(invoiceListResourceQuery.getMaxCount()));
+			}
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getClientNo())) {
+				invoiceCriteria.setClientNo(Integer.parseInt(invoiceListResourceQuery.getClientNo()));
+			}
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceStatus())) {
+				invoiceCriteria.setInvoiceStatus(invoiceListResourceQuery.getInvoiceStatus());
+			}
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMin())) {
+
+				invoiceCriteria.setInvoiceDateMin(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMin()));
+
+			}
+
+			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMax())) {
+				invoiceCriteria.setInvoiceDateMax(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMax()));
+			}
+
+		} catch (ParseException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
+
 
 		List<Invoice> invoiceList = invoiceRepository.findByCriteria(invoiceCriteria);
 
@@ -202,13 +243,21 @@ public class InvoiceService {
 		Date today = new Date();
 		Date invoiceStartDate = null;
 		Date invoiceEndDate = null;
-		try {
-			invoiceStartDate = sdf.parse(newInvoice.getInvoiceStartDate());
-			invoiceEndDate = sdf.parse(newInvoice.getInvoiceEndDate());
-		} catch (ParseException e1) {
-			// TODO 自動生成された catch ブロック
-			e1.printStackTrace();
-		}
+
+//		invoiceStartDate = newInvoice.getInvoiceStartDate();
+//		invoiceEndDate = newInvoice.getInvoiceEndDate();
+			//TODO
+			try {
+				invoiceStartDate = sdf.parse(newInvoice.getInvoiceStartDate());
+				invoiceEndDate = sdf.parse(newInvoice.getInvoiceEndDate());
+			} catch (ParseException e) {
+				// TODO 自動生成された catch ブロック
+				e.printStackTrace();
+			}
+
+
+
+
 
 		//TODO
 		Client client = clientRepository.findOne(Integer.parseInt(newInvoice.getClientNo()));

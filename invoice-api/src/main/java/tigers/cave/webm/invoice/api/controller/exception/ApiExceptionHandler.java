@@ -1,5 +1,7 @@
 package tigers.cave.webm.invoice.api.controller.exception;
 
+import javax.validation.ConstraintViolationException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
@@ -34,25 +36,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
-		//TODO
 		ApiError apiError = null;
-		if (ex instanceof BindException) {
+		if (ex instanceof HttpMessageNotReadableException) {
 
-			apiError = createApiError(ex, "E400000", "不正なリクエストです。");
-			status = HttpStatus.BAD_REQUEST;
-
-		} else if (ex instanceof HttpMessageNotReadableException) {
-
-			apiError = createApiError(ex, "E400001", "JSON形式が不正です。");
+			apiError = createApiError(ex, "E400001", getMessage("E400001", new String[] {}, request));
 			status = HttpStatus.BAD_REQUEST;
 
 		} else if (ex instanceof HttpMediaTypeNotSupportedException) {
 
-			apiError = createApiError(ex, "E400002", "Content-Typeが不正です。");
+			apiError = createApiError(ex, "E400002", getMessage("E400002", new String[] {}, request));
 			status = HttpStatus.UNSUPPORTED_MEDIA_TYPE;
 
 		} else {
-			apiError = createApiError(ex, "", ex.getMessage());
+			apiError = createApiError(ex, "E500000", getMessage("E500000", new String[] {}, request));
+			status = HttpStatus.INTERNAL_SERVER_ERROR;
 		}
 
 		return super.handleExceptionInternal(ex, apiError, headers, status, request);
@@ -64,7 +61,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 			HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
-		ApiError apiError = createApiError(ex, "E400000", "不正なリクエストです。");
+		ApiError apiError = createApiError(ex, "E400000", getMessage("E400000", new String[] {}, request));
 
 		ex.getBindingResult().getGlobalErrors().stream()
 				.forEach(e -> apiError.addDetail(e.getDefaultMessage(), getMessage(e, request), e.getObjectName()));
@@ -76,17 +73,44 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	}
 
+	@Override
+	protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers,
+			HttpStatus status, WebRequest request) {
+
+		ApiError apiError = createApiError(ex, "E400000", getMessage("E400000", new String[] {}, request));
+
+		ex.getBindingResult().getGlobalErrors().stream()
+				.forEach(e -> apiError.addDetail(e.getDefaultMessage(), getMessage(e, request), e.getObjectName()));
+
+		ex.getBindingResult().getFieldErrors().stream()
+				.forEach(e -> apiError.addDetail(e.getDefaultMessage(), getMessage(e, request), e.getField()));
+
+		return super.handleExceptionInternal(ex, apiError, headers, HttpStatus.BAD_REQUEST, request);
+	}
+
+	@ExceptionHandler
+	public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex,
+			WebRequest request) {
+
+		ApiError apiError = createApiError(ex, "E400000", getMessage("E400000", new String[] {}, request));
+		return super.handleExceptionInternal(ex, apiError, null, HttpStatus.BAD_REQUEST, request);
+
+	}
+
 	@ExceptionHandler
 	public ResponseEntity<Object> handleSystemException(Exception ex, WebRequest request) {
 
-		//TODO
-		ApiError apiError = createApiError(ex, "E500000", "システムエラーです。");
+		ApiError apiError = createApiError(ex, "E500000", getMessage("E500000", new String[] {}, request));
 		return super.handleExceptionInternal(ex, apiError, null, HttpStatus.INTERNAL_SERVER_ERROR, request);
 
 	}
 
 	private String getMessage(MessageSourceResolvable resolvable, WebRequest request) {
 		return messageSource.getMessage(resolvable, request.getLocale());
+	}
+
+	private String getMessage(String code, Object[] args, WebRequest request) {
+		return messageSource.getMessage(code, args, request.getLocale());
 	}
 
 }

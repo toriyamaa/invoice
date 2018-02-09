@@ -17,11 +17,7 @@
 		<version>1.5.9.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-<!--
-	<modules>
-        <module>invoice-api</module>
-    </modules>
--->
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -45,15 +41,5 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-<!--
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
--->
 
 </project>

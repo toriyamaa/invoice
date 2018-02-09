@@ -8,6 +8,7 @@ import tigers.cave.webm.invoice.api.validation.DateTimeCompare;
 import tigers.cave.webm.invoice.api.validation.DateTimeFormatValid;
 import tigers.cave.webm.invoice.api.validation.InvoiceStatusValid;
 import tigers.cave.webm.invoice.api.validation.Numeric;
+import tigers.cave.webm.invoice.api.validation.NumericZeroSuppress;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ public class InvoiceListResourceQuery implements Serializable {
 
 	private static final long serialVersionUID = -388688920418678467L;
 
-	@Numeric(message = "NotNumber")
+	@NumericZeroSuppress(message = "NotNumber")
 	private String start;
 
 	@Numeric(message = "NotNumber")
@@ -33,6 +34,5 @@ public class InvoiceListResourceQuery implements Serializable {
 
 	@DateTimeFormatValid(message = "InvalidDateFormat")
 	private String invoiceDateMax;
-
 
 }

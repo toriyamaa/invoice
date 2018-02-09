@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import tigers.cave.webm.invoice.api.common.ApplicationException;
 import tigers.cave.webm.invoice.api.resource.InvoiceDetailResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceListResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResource;
@@ -35,13 +36,15 @@ public class InvoiceApiController {
 	 * @param invoiceListResourceQuery the invoice list resource query
 	 * @param uriBuilder the uri builder
 	 * @return the invoice list resource
+	 * @throws Exception the exception
 	 */
 	@RequestMapping(method = RequestMethod.GET)
 	public InvoiceListResource searchInvoices(
 			@Validated InvoiceListResourceQuery invoiceListResourceQuery,
-			UriComponentsBuilder uriBuilder) {
+			UriComponentsBuilder uriBuilder) throws Exception {
 
-		InvoiceListResource invoiceListResource = invoiceService.findAllInvoicesByCriteria(invoiceListResourceQuery,
+		InvoiceListResource invoiceListResource = invoiceService.findAllInvoicesByCriteria(
+				invoiceListResourceQuery,
 				uriBuilder);
 
 		return invoiceListResource;
@@ -52,9 +55,12 @@ public class InvoiceApiController {
 	 *
 	 * @param invoiceNo the invoice no
 	 * @return the invoice
+	 * @throws ApplicationException
 	 */
 	@RequestMapping(path = "{invoiceNo}", method = RequestMethod.GET)
-	public InvoiceDetailResource getInvoice(@PathVariable @Validated @Numeric(message = "NotNumber") String invoiceNo) {
+	public InvoiceDetailResource getInvoice(
+			@PathVariable @Validated @Numeric String invoiceNo)
+			throws ApplicationException {
 
 		InvoiceDetailResource invoiceDetailResource = invoiceService.findInvoice(invoiceNo);
 
@@ -66,11 +72,12 @@ public class InvoiceApiController {
 	 *
 	 * @param newInvoice the new invoice
 	 * @return the invoice registration result resource
+	 * @throws Exception
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public InvoiceRegistrationResultResource createInvoice(
 			@Validated @RequestBody InvoiceRegistrationResource newInvoice,
-			UriComponentsBuilder uriBuilder) {
+			UriComponentsBuilder uriBuilder) throws Exception {
 
 		InvoiceRegistrationResultResource invoiceRegistrationResultResource = invoiceService.createInvoice(newInvoice,
 				uriBuilder);

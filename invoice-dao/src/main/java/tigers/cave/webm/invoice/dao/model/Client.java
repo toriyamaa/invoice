@@ -15,57 +15,57 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-
 /**
  * The persistent class for the client_tbl database table.
  *
  */
 @Entity
-@Table(name="client_tbl")
-@NamedQuery(name="Client.findAll", query="SELECT c FROM Client c")
+@Table(name = "client_tbl")
+@NamedQuery(name = "Client.findAll", query = "SELECT c FROM Client c")
 public class Client implements Serializable {
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = -5693621797102247708L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="client_no")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "client_no")
 	private int clientNo;
 
-	@Column(name="client_address")
+	@Column(name = "client_address")
 	private String clientAddress;
 
-	@Column(name="client_charge_first_name")
+	@Column(name = "client_charge_first_name")
 	private String clientChargeFirstName;
 
-	@Column(name="client_charge_last_name")
+	@Column(name = "client_charge_last_name")
 	private String clientChargeLastName;
 
-	@Column(name="client_fax")
+	@Column(name = "client_fax")
 	private String clientFax;
 
-	@Column(name="client_name")
+	@Column(name = "client_name")
 	private String clientName;
 
-	@Column(name="client_tel")
+	@Column(name = "client_tel")
 	private String clientTel;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_datetime")
+	@Column(name = "create_datetime")
 	private Date createDatetime;
 
-	@Column(name="del_flg")
+	@Column(name = "del_flg")
 	private String delFlg;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="update_datetime")
+	@Column(name = "update_datetime")
 	private Date updateDatetime;
 
 	//bi-directional many-to-one association to Invoice
-	@OneToMany(mappedBy="clientTbl")
+	@OneToMany(mappedBy = "clientTbl")
 	private List<Invoice> invoiceTbls;
 
 	//bi-directional many-to-one association to Order
-	@OneToMany(mappedBy="clientTbl")
+	@OneToMany(mappedBy = "clientTbl")
 	private List<Order> orderTbls;
 
 	public Client() {

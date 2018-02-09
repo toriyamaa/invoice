@@ -2,7 +2,6 @@ package tigers.cave.webm.invoice.api.service;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +14,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import tigers.cave.webm.invoice.api.common.ApiProperties;
+import tigers.cave.webm.invoice.api.common.ApplicationException;
+import tigers.cave.webm.invoice.api.common.constant.MessageDetailType;
+import tigers.cave.webm.invoice.api.common.constant.MessageType;
 import tigers.cave.webm.invoice.api.controller.InvoiceApiController;
 import tigers.cave.webm.invoice.api.resource.InvoiceDetailResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceListResource;
@@ -23,6 +26,9 @@ import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResultResource;
 import tigers.cave.webm.invoice.api.resource.InvoiceResource;
 import tigers.cave.webm.invoice.api.resource.OrderResource;
 import tigers.cave.webm.invoice.api.resource.query.InvoiceListResourceQuery;
+import tigers.cave.webm.invoice.dao.common.constant.DelFlg;
+import tigers.cave.webm.invoice.dao.common.constant.InvoiceStatus;
+import tigers.cave.webm.invoice.dao.common.constant.ItemType;
 import tigers.cave.webm.invoice.dao.model.Client;
 import tigers.cave.webm.invoice.dao.model.Invoice;
 import tigers.cave.webm.invoice.dao.model.Order;
@@ -31,34 +37,51 @@ import tigers.cave.webm.invoice.dao.repository.InvoiceRepository;
 import tigers.cave.webm.invoice.dao.repository.OrderRepository;
 import tigers.cave.webm.invoice.dao.repository.criteria.InvoiceCriteria;
 
+/**
+ * The Class InvoiceService.
+ */
 @Service
 public class InvoiceService {
 
+	/** The invoice repository. */
 	@Autowired
 	InvoiceRepository invoiceRepository;
 
+	/** The client repository. */
 	@Autowired
 	ClientRepository clientRepository;
 
+	/** The order repository. */
 	@Autowired
 	OrderRepository orderRepository;
 
+	/** The api properties. */
+	@Autowired
+	ApiProperties apiProperties;
+
+	/**
+	 * Find invoice.
+	 *
+	 * @param invoiceNo the invoice no
+	 * @return the invoice detail resource
+	 * @throws ApplicationException the application exception
+	 */
 	@Transactional(readOnly = true)
-	public InvoiceDetailResource findInvoice(String invoiceNo) {
+	public InvoiceDetailResource findInvoice(String invoiceNo) throws ApplicationException {
 
-		//TODO delFlg設定
-		Invoice invoice = invoiceRepository.findOne(Integer.parseInt(invoiceNo));
-		if (invoice == null) {
-			return new InvoiceDetailResource();
-		}
+		//エラーチェック
+		errCheckFindInvoice(invoiceNo);
 
-		//TODO
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+		//請求書データ取得
+		Invoice invoice = invoiceRepository.findByInvoiceNo(Integer.parseInt(invoiceNo), DelFlg.NOT_DELETE.getValue());
+
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(apiProperties.getDateFormat());
+		SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(apiProperties.getDateTimeFormat());
 
 		InvoiceDetailResource invoiceDetailResource = new InvoiceDetailResource();
 		Client client = invoice.getClientTbl();
 
+		//請求書データをResouceクラスに設定
 		invoiceDetailResource.setInvoiceNo(invoiceNo);
 		invoiceDetailResource.setClientNo(String.valueOf(client.getClientNo()));
 		invoiceDetailResource.setClientChargeName(
@@ -69,8 +92,7 @@ public class InvoiceService {
 		invoiceDetailResource.setClientTel(client.getClientTel());
 		invoiceDetailResource.setClientFax(client.getClientFax());
 		invoiceDetailResource.setInvoiceStatusCode(invoice.getInvoiceStatus());
-		//TODO
-		invoiceDetailResource.setInvoiceStatus("新規作成");
+		invoiceDetailResource.setInvoiceStatus(InvoiceStatus.decode(invoice.getInvoiceStatus()).getName());
 		invoiceDetailResource.setInvoiceCreateDate(
 				simpleDateFormat.format(invoice.getInvoiceCreateDate()));
 		invoiceDetailResource.setInvoiceTitle(invoice.getInvoiceTitle());
@@ -88,11 +110,13 @@ public class InvoiceService {
 		invoiceDetailResource.setUpdateDatetime(
 				simpleDateFormat.format(invoice.getUpdateDatetime()));
 
-		////TODO
+		//請求書に紐づく注文実績データ取得
 		List<Order> orderList = orderRepository.findByClientNoAndInvoiceTerm(client.getClientNo(),
 				invoice.getInvoiceStartDate(),
-				invoice.getInvoiceEndDate());
+				invoice.getInvoiceEndDate(),
+				DelFlg.NOT_DELETE.getValue());
 
+		//注文実績データをResourceクラスに設定
 		List<OrderResource> orderResourceList = new ArrayList<OrderResource>();
 		for (Order order : orderList) {
 
@@ -100,10 +124,7 @@ public class InvoiceService {
 			orderResource.setItemNo(String.valueOf(order.getItemNo()));
 			orderResource.setItemName(order.getItemName());
 			orderResource.setItemTypeCode(order.getItemType());
-
-			//TODO
-			orderResource.setItemType("書籍");
-
+			orderResource.setItemType(ItemType.decode(order.getItemType()).getName());
 			orderResource.setItemPrice(String.valueOf(order.getItemPrice()));
 			orderResource.setItemCount(String.valueOf(order.getItemCount()));
 			orderResource.setCreateDatetime(
@@ -121,54 +142,77 @@ public class InvoiceService {
 		return invoiceDetailResource;
 	}
 
-	@Transactional(readOnly = true)
-	public InvoiceListResource findAllInvoicesByCriteria(InvoiceListResourceQuery invoiceListResourceQuery,
-			UriComponentsBuilder uriBuilder) {
+	/**
+	 * Err check find invoice.
+	 *
+	 * @param invoiceNo the invoice no
+	 * @throws ApplicationException the application exception
+	 */
+	private void errCheckFindInvoice(String invoiceNo) throws ApplicationException {
 
-		//TODO 設定処理　serviceに移す？
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		InvoiceCriteria invoiceCriteria = new InvoiceCriteria();
+		ApplicationException ae = new ApplicationException(MessageType.BAD_REQUEST.getCode(), new String[] {});
 
-		try {
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getStart())) {
-				invoiceCriteria.setStart(Integer.parseInt(invoiceListResourceQuery.getStart())-1);
-			}
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getMaxCount())) {
-				invoiceCriteria.setMaxCount(Integer.parseInt(invoiceListResourceQuery.getMaxCount()));
-			}
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getClientNo())) {
-				invoiceCriteria.setClientNo(Integer.parseInt(invoiceListResourceQuery.getClientNo()));
-			}
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceStatus())) {
-				invoiceCriteria.setInvoiceStatus(invoiceListResourceQuery.getInvoiceStatus());
-			}
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMin())) {
-
-				invoiceCriteria.setInvoiceDateMin(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMin()));
-
-			}
-
-			if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMax())) {
-				invoiceCriteria.setInvoiceDateMax(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMax()));
-			}
-
-		} catch (ParseException e) {
-			// TODO 自動生成された catch ブロック
-			e.printStackTrace();
+		Invoice invoice = invoiceRepository.findByInvoiceNo(Integer.parseInt(invoiceNo), DelFlg.NOT_DELETE.getValue());
+		if (invoice == null) {
+			ae.addDetailList(MessageDetailType.INVOICE_NOT_EXIST.getDetailCode(), new String[] {}, "");
+			throw ae;
 		}
 
+	}
 
+	/**
+	 * Find all invoices by criteria.
+	 *
+	 * @param invoiceListResourceQuery the invoice list resource query
+	 * @param uriBuilder the uri builder
+	 * @return the invoice list resource
+	 * @throws Exception the exception
+	 */
+	@Transactional(readOnly = true)
+	public InvoiceListResource findAllInvoicesByCriteria(InvoiceListResourceQuery invoiceListResourceQuery,
+			UriComponentsBuilder uriBuilder) throws Exception {
 
+		SimpleDateFormat dateFormat = new SimpleDateFormat(apiProperties.getDateFormat());
+		InvoiceCriteria invoiceCriteria = new InvoiceCriteria();
+
+		String start = apiProperties.getStartDefaultValue();
+
+		//絞り込み条件の設定
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getStart())) {
+			start = invoiceListResourceQuery.getStart();
+			invoiceCriteria.setStart(Integer.parseInt(start) - 1);
+		} else {
+			invoiceCriteria.setStart(Integer.parseInt(start) - 1);
+		}
+
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getMaxCount())) {
+			invoiceCriteria.setMaxCount(Integer.parseInt(invoiceListResourceQuery.getMaxCount()));
+		} else {
+			invoiceCriteria.setMaxCount(Integer.parseInt(apiProperties.getMaxCountDefaultValue()));
+		}
+
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getClientNo())) {
+			invoiceCriteria.setClientNo(Integer.parseInt(invoiceListResourceQuery.getClientNo()));
+		}
+
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceStatus())) {
+			invoiceCriteria.setInvoiceStatus(invoiceListResourceQuery.getInvoiceStatus());
+		}
+
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMin())) {
+
+			invoiceCriteria.setInvoiceDateMin(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMin()));
+
+		}
+
+		if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMax())) {
+			invoiceCriteria.setInvoiceDateMax(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMax()));
+		}
+
+		//請求書データの検索結果取得
 		List<Invoice> invoiceList = invoiceRepository.findByCriteria(invoiceCriteria);
 
-		//TODO
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+		//請求書データをResourceクラスに設定
 		List<InvoiceResource> invoiceResourceList = new ArrayList<InvoiceResource>();
 		for (Invoice invoice : invoiceList) {
 
@@ -180,24 +224,23 @@ public class InvoiceService {
 							+ invoice.getClientTbl().getClientChargeFirstName());
 			invoiceResource.setClientName(invoice.getClientTbl().getClientName());
 			invoiceResource.setInvoiceStatusCode(invoice.getInvoiceStatus());
-			//TODO
-			invoiceResource.setInvoiceStatus("新規作成");
+			invoiceResource.setInvoiceStatus(InvoiceStatus.decode(invoice.getInvoiceStatus()).getName());
 			invoiceResource.setInvoiceCreateDate(
-					simpleDateFormat.format(invoice.getInvoiceCreateDate()));
+					dateFormat.format(invoice.getInvoiceCreateDate()));
 			invoiceResource.setInvoiceTitle(invoice.getInvoiceTitle());
 			invoiceResource.setInvoiceAmt(String.valueOf(invoice.getInvoiceAmt()));
 			invoiceResource.setTaxAmt(String.valueOf(invoice.getTaxAmt()));
 			invoiceResource.setInvoiceStartDate(
-					simpleDateFormat.format(invoice.getInvoiceStartDate()));
+					dateFormat.format(invoice.getInvoiceStartDate()));
 			invoiceResource.setInvoiceEndDate(
-					simpleDateFormat.format(invoice.getInvoiceEndDate()));
+					dateFormat.format(invoice.getInvoiceEndDate()));
 			invoiceResource.setInvoiceNote(invoice.getInvoiceNote());
 			invoiceResource.setCreateUser(invoice.getCreateUser());
 			invoiceResource.setCreateDatetime(
-					simpleDateFormat.format(invoice.getCreateDatetime()));
+					dateFormat.format(invoice.getCreateDatetime()));
 			invoiceResource.setUpdateUser(invoice.getUpdateUser());
 			invoiceResource.setUpdateDatetime(
-					simpleDateFormat.format(invoice.getUpdateDatetime()));
+					dateFormat.format(invoice.getUpdateDatetime()));
 
 			URI resourceUri = MvcUriComponentsBuilder.relativeTo(uriBuilder)
 					.withMethodCall(MvcUriComponentsBuilder.on(InvoiceApiController.class)
@@ -212,11 +255,10 @@ public class InvoiceService {
 
 		InvoiceListResource invoiceListResource = new InvoiceListResource();
 
-		//TODO 総件数取得する
 		invoiceListResource.setInvoicesMaxCount(
-				String.valueOf(invoiceResourceList.size()));
-		//TODO 設定する
-		invoiceListResource.setStart("1");
+				String.valueOf(invoiceRepository.countAllByCriteria(invoiceCriteria)));
+
+		invoiceListResource.setStart(start);
 
 		invoiceListResource.setInvoicesCount(
 				String.valueOf(invoiceResourceList.size()));
@@ -231,73 +273,70 @@ public class InvoiceService {
 	 * @param newInvoice the new invoice
 	 * @param uriBuilder the uri builder
 	 * @return the invoice registration result resource
+	 * @throws Exception the exception
 	 */
 	@Transactional
 	public InvoiceRegistrationResultResource createInvoice(InvoiceRegistrationResource newInvoice,
-			UriComponentsBuilder uriBuilder) {
+			UriComponentsBuilder uriBuilder) throws Exception {
+
+		//エラーチェック
+		errCheckCreateInvoice(newInvoice);
 
 		Invoice invoice = new Invoice();
 
-		//TODO
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdf = new SimpleDateFormat(apiProperties.getDateFormat());
 		Date today = new Date();
 		Date invoiceStartDate = null;
 		Date invoiceEndDate = null;
 
-//		invoiceStartDate = newInvoice.getInvoiceStartDate();
-//		invoiceEndDate = newInvoice.getInvoiceEndDate();
-			//TODO
-			try {
-				invoiceStartDate = sdf.parse(newInvoice.getInvoiceStartDate());
-				invoiceEndDate = sdf.parse(newInvoice.getInvoiceEndDate());
-			} catch (ParseException e) {
-				// TODO 自動生成された catch ブロック
-				e.printStackTrace();
-			}
+		invoiceStartDate = sdf.parse(newInvoice.getInvoiceStartDate());
+		invoiceEndDate = sdf.parse(newInvoice.getInvoiceEndDate());
 
+		//顧客管理データ取得
+		Client client = clientRepository.findByClientNo(Integer.parseInt(newInvoice.getClientNo()),
+				DelFlg.NOT_DELETE.getValue());
 
-
-
-
-		//TODO
-		Client client = clientRepository.findOne(Integer.parseInt(newInvoice.getClientNo()));
+		//登録する請求書データ作成
 		invoice.setClientTbl(client);
-		invoice.setInvoiceStatus("10");
+		invoice.setInvoiceStatus(InvoiceStatus.NEW.getCode());
 		invoice.setInvoiceCreateDate(today);
 
 		invoice.setInvoiceTitle(newInvoice.getInvoiceTitle());
 
-		//TODO
 		List<Order> orderList = orderRepository.findByClientNoAndInvoiceTerm(
 				client.getClientNo(),
 				invoiceStartDate,
-				invoiceEndDate);
+				invoiceEndDate,
+				DelFlg.NOT_DELETE.getValue());
 
-		//TODO intで大丈夫か？
-		int invoiceAmt = 0;
+		//請求金額計算
+		BigDecimal invoiceAmt = BigDecimal.ZERO;
 		for (Order order : orderList) {
 
-			invoiceAmt = invoiceAmt + (order.getItemPrice() * order.getItemCount());
-		}
-		invoice.setInvoiceAmt(invoiceAmt);
+			invoiceAmt = invoiceAmt.add(
+					(new BigDecimal(order.getItemPrice())).multiply(
+							new BigDecimal(order.getItemCount())));
 
-		BigDecimal taxAmt = BigDecimal.valueOf(invoiceAmt);
-		invoice.setTaxAmt(taxAmt.multiply(new BigDecimal(1.08)).intValue());//TODO 消費税計算
+		}
+		invoice.setInvoiceAmt(invoiceAmt.intValue());
+
+		//消費税計算
+		invoice.setTaxAmt(
+				invoiceAmt.multiply(new BigDecimal(apiProperties.getConsumptionTax())).intValue());
 
 		invoice.setInvoiceStartDate(invoiceStartDate);
 		invoice.setInvoiceEndDate(invoiceEndDate);
-
 		invoice.setInvoiceNote(newInvoice.getInvoiceNote());
 		invoice.setCreateUser(newInvoice.getCreateUser());
 		invoice.setCreateDatetime(today);
 		invoice.setUpdateUser(newInvoice.getCreateUser());
 		invoice.setUpdateDatetime(today);
+		invoice.setDelFlg(DelFlg.NOT_DELETE.getValue());
 
-		//TODO
-		invoice.setDelFlg("0");
-
+		//請求書データ登録
 		invoiceRepository.save(invoice);
 
+		//登録結果をResourceクラスに設定
 		InvoiceRegistrationResultResource invoiceRegistrationResultResource = new InvoiceRegistrationResultResource();
 		invoiceRegistrationResultResource.setInvoiceNo(String.valueOf(invoice.getInvoiceNo()));
 
@@ -309,6 +348,55 @@ public class InvoiceService {
 		invoiceRegistrationResultResource.setUrl(resourceUri.toString());
 
 		return invoiceRegistrationResultResource;
+
+	}
+
+	/**
+	 * Err check create invoice.
+	 *
+	 * @param newInvoice the new invoice
+	 * @throws ApplicationException the application exception
+	 * @throws Exception the exception
+	 */
+	private void errCheckCreateInvoice(InvoiceRegistrationResource newInvoice) throws ApplicationException, Exception {
+
+		ApplicationException ae = new ApplicationException(MessageType.BAD_REQUEST.getCode(), new String[] {});
+
+		SimpleDateFormat sdf = new SimpleDateFormat(apiProperties.getDateFormat());
+		Date invoiceStartDate = sdf.parse(newInvoice.getInvoiceStartDate());
+		Date invoiceEndDate = sdf.parse(newInvoice.getInvoiceEndDate());
+
+		//顧客管理データ存在チェック
+		Client client = clientRepository.findByClientNo(Integer.parseInt(newInvoice.getClientNo()),
+				DelFlg.NOT_DELETE.getValue());
+		if (client == null) {
+			ae.addDetailList(MessageDetailType.NOT_EXIST.getDetailCode(), new String[] { "clientNo" }, "clientNo");
+			throw ae;
+		}
+
+		//請求書期間重複チェック
+		List<Invoice> invoiceList = invoiceRepository.findByClientNoAndInvoiceTerm(
+				Integer.parseInt(newInvoice.getClientNo()),
+				invoiceStartDate,
+				invoiceEndDate,
+				DelFlg.NOT_DELETE.getValue());
+
+		if (!invoiceList.isEmpty()) {
+			ae.addDetailList(MessageDetailType.INVOICE_DUPLICATION.getDetailCode(), new String[] {}, "");
+			throw ae;
+		}
+
+		//注文実績データ存在チェック
+		List<Order> orderList = orderRepository.findByClientNoAndInvoiceTerm(
+				Integer.parseInt(newInvoice.getClientNo()),
+				invoiceStartDate,
+				invoiceEndDate,
+				DelFlg.NOT_DELETE.getValue());
+
+		if (orderList.isEmpty()) {
+			ae.addDetailList(MessageDetailType.ORDER_NOT_EXIST.getDetailCode(), new String[] {}, "");
+			throw ae;
+		}
 
 	}
 

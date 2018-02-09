@@ -21,12 +21,14 @@ import javax.validation.constraints.Pattern;
 public @interface AlphaNumeric {
 
 	String message() default "{tigers.cave.webm.invoice.api.validation.AlphaNumeric,message}";
+
 	Class<?>[] groups() default {};
+
 	Class<? extends Payload>[] payload() default {};
 
 	@Documented
 	@Retention(RUNTIME)
-	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE})
+	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
 	public @interface List {
 		AlphaNumeric[] value();
 	}

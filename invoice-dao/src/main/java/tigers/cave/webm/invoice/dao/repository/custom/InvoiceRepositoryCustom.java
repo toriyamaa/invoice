@@ -9,4 +9,6 @@ public interface InvoiceRepositoryCustom {
 
 	List<Invoice> findByCriteria(InvoiceCriteria invoiceCriteria);
 
+	long countAllByCriteria(InvoiceCriteria invoiceCriteria);
+
 }

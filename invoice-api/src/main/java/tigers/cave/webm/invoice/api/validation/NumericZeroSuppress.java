@@ -10,31 +10,27 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
-
-import tigers.cave.webm.invoice.api.common.validation.DateTimeCompareValidator;
+import javax.validation.constraints.Pattern;
 
 @Documented
+@Constraint(validatedBy = {})
 @Retention(RUNTIME)
-@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE, TYPE })
-@Constraint(validatedBy = { DateTimeCompareValidator.class })
+@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
 @ReportAsSingleViolation
-public @interface DateTimeCompare {
+@Pattern(regexp = "[1-9][0-9]*")
+public @interface NumericZeroSuppress {
 
-	String message() default "{tigers.cave.webm.invoice.api.validation.DateTimeCompare.message}";
+	String message() default "{tigers.cave.webm.invoice.api.validation.NumericZeroSuppress,message}";
 
 	Class<?>[] groups() default {};
 
 	Class<? extends Payload>[] payload() default {};
 
-	String startDay();
-
-	String endDay();
-
 	@Documented
 	@Retention(RUNTIME)
-	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE, TYPE })
+	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
 	public @interface List {
-		DateTimeCompare[] value();
+		NumericZeroSuppress[] value();
 	}
 
 }

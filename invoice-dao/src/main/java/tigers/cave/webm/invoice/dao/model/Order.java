@@ -15,51 +15,51 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-
 /**
  * The persistent class for the order_tbl database table.
  *
  */
 @Entity
-@Table(name="order_tbl")
-@NamedQuery(name="Order.findAll", query="SELECT o FROM Order o")
+@Table(name = "order_tbl")
+@NamedQuery(name = "Order.findAll", query = "SELECT o FROM Order o")
 public class Order implements Serializable {
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = -3629855706785177461L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="order_no")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "order_no")
 	private int orderNo;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_datetime")
+	@Column(name = "create_datetime")
 	private Date createDatetime;
 
-	@Column(name="del_flg")
+	@Column(name = "del_flg")
 	private String delFlg;
 
-	@Column(name="item_count")
+	@Column(name = "item_count")
 	private int itemCount;
 
-	@Column(name="item_name")
+	@Column(name = "item_name")
 	private String itemName;
 
-	@Column(name="item_no")
+	@Column(name = "item_no")
 	private int itemNo;
 
-	@Column(name="item_price")
+	@Column(name = "item_price")
 	private int itemPrice;
 
-	@Column(name="item_type")
+	@Column(name = "item_type")
 	private String itemType;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="update_datetime")
+	@Column(name = "update_datetime")
 	private Date updateDatetime;
 
 	//bi-directional many-to-one association to Client
 	@ManyToOne
-	@JoinColumn(name="client_no")
+	@JoinColumn(name = "client_no")
 	private Client clientTbl;
 
 	public Order() {

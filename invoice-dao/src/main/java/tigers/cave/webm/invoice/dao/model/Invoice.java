@@ -15,70 +15,69 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-
 /**
  * The persistent class for the invoice_tbl database table.
  *
  */
 @Entity
-@Table(name="invoice_tbl")
-@NamedQuery(name="Invoice.findAll", query="SELECT i FROM Invoice i")
+@Table(name = "invoice_tbl")
+@NamedQuery(name = "Invoice.findAll", query = "SELECT i FROM Invoice i")
 public class Invoice implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 704313157453146564L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	@Column(name="invoice_no")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "invoice_no")
 	private int invoiceNo;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="create_datetime")
+	@Column(name = "create_datetime")
 	private Date createDatetime;
 
-	@Column(name="create_user")
+	@Column(name = "create_user")
 	private String createUser;
 
-	@Column(name="del_flg")
+	@Column(name = "del_flg")
 	private String delFlg;
 
-	@Column(name="invoice_amt")
+	@Column(name = "invoice_amt")
 	private int invoiceAmt;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="invoice_create_date")
+	@Column(name = "invoice_create_date")
 	private Date invoiceCreateDate;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="invoice_end_date")
+	@Column(name = "invoice_end_date")
 	private Date invoiceEndDate;
 
-	@Column(name="invoice_note")
+	@Column(name = "invoice_note")
 	private String invoiceNote;
 
 	@Temporal(TemporalType.DATE)
-	@Column(name="invoice_start_date")
+	@Column(name = "invoice_start_date")
 	private Date invoiceStartDate;
 
-	@Column(name="invoice_status")
+	@Column(name = "invoice_status")
 	private String invoiceStatus;
 
-	@Column(name="invoice_title")
+	@Column(name = "invoice_title")
 	private String invoiceTitle;
 
-	@Column(name="tax_amt")
+	@Column(name = "tax_amt")
 	private int taxAmt;
 
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="update_datetime")
+	@Column(name = "update_datetime")
 	private Date updateDatetime;
 
-	@Column(name="update_user")
+	@Column(name = "update_user")
 	private String updateUser;
 
 	//bi-directional many-to-one association to Client
 	@ManyToOne
-	@JoinColumn(name="client_no")
+	@JoinColumn(name = "client_no")
 	private Client clientTbl;
 
 	public Invoice() {

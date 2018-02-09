@@ -16,17 +16,19 @@ import tigers.cave.webm.invoice.api.common.validation.DateTimeFormatValidator;
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, ANNOTATION_TYPE })
-@Constraint(validatedBy = {DateTimeFormatValidator.class})
+@Constraint(validatedBy = { DateTimeFormatValidator.class })
 @ReportAsSingleViolation
 public @interface DateTimeFormatValid {
 
 	String message() default "{tigers.cave.webm.invoice.api.validation.DateTimeFormatValid.message}";
+
 	Class<?>[] groups() default {};
+
 	Class<? extends Payload>[] payload() default {};
 
 	@Documented
 	@Retention(RUNTIME)
-	@Target({ FIELD, ANNOTATION_TYPE})
+	@Target({ FIELD, ANNOTATION_TYPE })
 	public @interface List {
 		DateTimeFormatValid[] value();
 	}

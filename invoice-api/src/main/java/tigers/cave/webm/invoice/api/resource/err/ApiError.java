@@ -20,7 +20,7 @@ public class ApiError implements Serializable {
 	private String message;
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<ApiDetailError> details = new ArrayList<ApiDetailError>();
+	private List<ApiErrorDetail> details = new ArrayList<ApiErrorDetail>();
 
 	public ApiError(String code, String message) {
 		this.code = code;
@@ -28,7 +28,7 @@ public class ApiError implements Serializable {
 	}
 
 	public void addDetail(String code, String message, String target) {
-		this.details.add(new ApiDetailError(code, message, target));
+		this.details.add(new ApiErrorDetail(code, message, target));
 	}
 
 }

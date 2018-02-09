@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ApiDetailError implements Serializable {
+public class ApiErrorDetail implements Serializable {
 
 	private static final long serialVersionUID = -8081059689008863444L;
 
@@ -17,7 +17,7 @@ public class ApiDetailError implements Serializable {
 
 	private String target;
 
-	public ApiDetailError(String code, String message, String target) {
+	public ApiErrorDetail(String code, String message, String target) {
 		this.code = code;
 		this.message = message;
 		this.target = target;

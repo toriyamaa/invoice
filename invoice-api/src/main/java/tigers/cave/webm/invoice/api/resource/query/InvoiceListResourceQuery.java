@@ -2,16 +2,17 @@ package tigers.cave.webm.invoice.api.resource.query;
 
 import java.io.Serializable;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import tigers.cave.webm.invoice.api.validation.DateTimeCompare;
 import tigers.cave.webm.invoice.api.validation.DateTimeFormatValid;
 import tigers.cave.webm.invoice.api.validation.InvoiceStatusValid;
 import tigers.cave.webm.invoice.api.validation.Numeric;
 import tigers.cave.webm.invoice.api.validation.NumericZeroSuppress;
 
-@Getter
-@Setter
+/**
+ * 請求書一覧取得のリクエストパラメータ.
+ */
+@Data
 @DateTimeCompare(message = "InvalidRelation", endDay = "invoiceDateMax", startDay = "invoiceDateMin")
 public class InvoiceListResourceQuery implements Serializable {
 

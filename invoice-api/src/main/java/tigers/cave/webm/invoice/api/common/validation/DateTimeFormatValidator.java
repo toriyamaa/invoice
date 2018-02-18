@@ -11,6 +11,9 @@ import tigers.cave.webm.invoice.api.validation.DateTimeFormatValid;
 
 /**
  * The Class DateTimeFormatValidator.
+ *
+ * 日付のフォーマットチェックのバリデータ
+ * yyyy-MM-dd形式かどうかをチェックする。
  */
 public class DateTimeFormatValidator implements ConstraintValidator<DateTimeFormatValid, String> {
 
@@ -27,6 +30,7 @@ public class DateTimeFormatValidator implements ConstraintValidator<DateTimeForm
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
 
+	  //必須かどうかはここではチェックしないのでnullは許容
 		if (value == null) {
 			return true;
 		}
@@ -34,8 +38,10 @@ public class DateTimeFormatValidator implements ConstraintValidator<DateTimeForm
 		Pattern ptn = Pattern.compile("^(\\d{4})-(\\d{1,2})-(\\d{1,2})$");
 		Matcher mch = ptn.matcher(value);
 
+		//フォーマットのチェック
 		if (mch.find()) {
 			try {
+			  //日付の妥当性のチェック
 				LocalDate.of(
 						Integer.valueOf(mch.group(1)),
 						Integer.valueOf(mch.group(2)),

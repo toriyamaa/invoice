@@ -1,12 +1,14 @@
 package tigers.cave.webm.invoice.api.common;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import lombok.Getter;
 
 @Component
 @Getter
+@PropertySource("classpath:application-api.properties")
 public class ApiProperties {
 
 	@Value("${api.InvoiceListResourceQuery.start.default.value}")

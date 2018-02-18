@@ -14,6 +14,10 @@ import tigers.cave.webm.invoice.api.validation.DateTimeCompare;
 
 /**
  * The Class DateTimeCompareValidator.
+ *
+ * 日付の前後チェックのバリデータ
+ * 開始日>終了日ならエラーメッセージを生成し、falseを返す
+ * ※前後チェックのエラー以外は、trueを返す
  */
 public class DateTimeCompareValidator implements ConstraintValidator<DateTimeCompare, Object> {
 
@@ -48,6 +52,7 @@ public class DateTimeCompareValidator implements ConstraintValidator<DateTimeCom
 			String start = (String) beanWrapper.getPropertyValue(startDay);
 			String end = (String) beanWrapper.getPropertyValue(endDay);
 
+			//nullは前後チェックを行えないのでtrueを返し、許容する
 			if (start == null || end == null) {
 				return true;
 			}
@@ -57,9 +62,10 @@ public class DateTimeCompareValidator implements ConstraintValidator<DateTimeCom
 			Matcher mchStart = ptn.matcher(start);
 			Matcher mchEnd = ptn.matcher(end);
 
-			LocalDate startDateObj;
-			LocalDate endDateObj;
+			LocalDate startDateObj = null;
+			LocalDate endDateObj = null;
 
+			//日付フォーマットの確認
 			if (mchStart.find() && mchEnd.find()) {
 
 				try {
@@ -81,18 +87,19 @@ public class DateTimeCompareValidator implements ConstraintValidator<DateTimeCom
 				return true;
 			}
 
-			if (endDateObj.compareTo(startDateObj) >= 0) {
-				return true;
+			//前後チェック
+			if (endDateObj.isBefore(startDateObj)) {
+
+        context.disableDefaultConstraintViolation();
+
+        context
+            .buildConstraintViolationWithTemplate(message)
+            .addPropertyNode(endDay)
+            .addConstraintViolation();
+        return false;
+
 			} else {
-
-				context.disableDefaultConstraintViolation();
-
-				context
-						.buildConstraintViolationWithTemplate(message)
-						.addPropertyNode(endDay)
-						.addConstraintViolation();
-				return false;
-
+			  return true;
 			}
 
 		}

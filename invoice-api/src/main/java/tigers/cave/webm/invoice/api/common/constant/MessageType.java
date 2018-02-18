@@ -34,7 +34,6 @@ public enum MessageType {
 	 *
 	 * @return the code
 	 */
-	// メソッド
 	public String getCode() {
 		return this.code;
 	}

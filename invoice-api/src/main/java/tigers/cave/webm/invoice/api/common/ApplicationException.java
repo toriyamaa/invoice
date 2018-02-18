@@ -1,15 +1,12 @@
 package tigers.cave.webm.invoice.api.common;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
 
 /**
- * Gets the detail list.
- *
- * @return the detail list
+ * アプリケーションエラー時の例外クラス
  */
 @Getter
 public class ApplicationException extends Exception {
@@ -24,7 +21,7 @@ public class ApplicationException extends Exception {
 	private String[] messageOption;
 
 	/** The detail list. */
-	private List<Detail> detailList = new ArrayList<Detail>();
+	private List<ApplicationExceptionDetail> detailList = new ArrayList<ApplicationExceptionDetail>();
 
 	/**
 	 * Instantiates a new application exception.
@@ -46,42 +43,7 @@ public class ApplicationException extends Exception {
 	 * @param field the field
 	 */
 	public void addDetailList(String code, String[] messageOption, String field) {
-		detailList.add(new Detail(code, messageOption, field));
-	}
-
-	/**
-	 * Gets the field.
-	 *
-	 * @return the field
-	 */
-	@Getter
-	public class Detail implements Serializable {
-
-		/** The Constant serialVersionUID. */
-		private static final long serialVersionUID = 3581845328490261650L;
-
-		/** The code. */
-		private String code;
-
-		/** The message option. */
-		private String[] messageOption;
-
-		/** The field. */
-		private String field;
-
-		/**
-		 * Instantiates a new detail.
-		 *
-		 * @param code the code
-		 * @param messageOption the message option
-		 * @param field the field
-		 */
-		public Detail(String code, String[] messageOption, String field) {
-			this.code = code;
-			this.messageOption = messageOption;
-			this.field = field;
-		}
-
+		detailList.add(new ApplicationExceptionDetail(code, messageOption, field));
 	}
 
 }

@@ -13,6 +13,7 @@
 		<groupId>tigers.cave.webm.invoice</groupId>
 		<artifactId>invoice-project</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../invoice-project</relativePath>
 	</parent>
 
 	<dependencies>

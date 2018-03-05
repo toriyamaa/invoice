@@ -115,10 +115,10 @@ public class InvoiceService {
     invoiceDetailResource.setInvoiceNote(invoice.getInvoiceNote());
     invoiceDetailResource.setCreateUser(invoice.getCreateUser());
     invoiceDetailResource.setCreateDatetime(
-        simpleDateFormat.format(invoice.getCreateDatetime()));
+        simpleDateFormat2.format(invoice.getCreateDatetime()));
     invoiceDetailResource.setUpdateUser(invoice.getUpdateUser());
     invoiceDetailResource.setUpdateDatetime(
-        simpleDateFormat.format(invoice.getUpdateDatetime()));
+        simpleDateFormat2.format(invoice.getUpdateDatetime()));
 
     //請求書に紐づく注文実績データ取得
     List<Order> orderList = orderRepository.findByClientNoAndInvoiceTerm(
@@ -166,7 +166,8 @@ public class InvoiceService {
       InvoiceListResourceQuery invoiceListResourceQuery,
       UriComponentsBuilder uriBuilder) throws Exception {
 
-    SimpleDateFormat dateFormat = new SimpleDateFormat(apiProperties.getDateFormat());
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(apiProperties.getDateFormat());
+    SimpleDateFormat simpleDateFormat2 = new SimpleDateFormat(apiProperties.getDateTimeFormat());
     InvoiceCriteria invoiceCriteria = new InvoiceCriteria();
 
     String start = apiProperties.getStartDefaultValue();
@@ -196,13 +197,13 @@ public class InvoiceService {
     if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMin())) {
 
       invoiceCriteria
-          .setInvoiceDateMin(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMin()));
+          .setInvoiceDateMin(simpleDateFormat.parse(invoiceListResourceQuery.getInvoiceDateMin()));
 
     }
 
     if (!StringUtils.isEmpty(invoiceListResourceQuery.getInvoiceDateMax())) {
       invoiceCriteria
-          .setInvoiceDateMax(dateFormat.parse(invoiceListResourceQuery.getInvoiceDateMax()));
+          .setInvoiceDateMax(simpleDateFormat.parse(invoiceListResourceQuery.getInvoiceDateMax()));
     }
 
     //請求書データの検索結果取得
@@ -222,21 +223,21 @@ public class InvoiceService {
       invoiceResource.setInvoiceStatusCode(invoice.getInvoiceStatus());
       invoiceResource.setInvoiceStatus(InvoiceStatus.decode(invoice.getInvoiceStatus()).getName());
       invoiceResource.setInvoiceCreateDate(
-          dateFormat.format(invoice.getInvoiceCreateDate()));
+          simpleDateFormat.format(invoice.getInvoiceCreateDate()));
       invoiceResource.setInvoiceTitle(invoice.getInvoiceTitle());
       invoiceResource.setInvoiceAmt(String.valueOf(invoice.getInvoiceAmt()));
       invoiceResource.setTaxAmt(String.valueOf(invoice.getTaxAmt()));
       invoiceResource.setInvoiceStartDate(
-          dateFormat.format(invoice.getInvoiceStartDate()));
+          simpleDateFormat.format(invoice.getInvoiceStartDate()));
       invoiceResource.setInvoiceEndDate(
-          dateFormat.format(invoice.getInvoiceEndDate()));
+          simpleDateFormat.format(invoice.getInvoiceEndDate()));
       invoiceResource.setInvoiceNote(invoice.getInvoiceNote());
       invoiceResource.setCreateUser(invoice.getCreateUser());
       invoiceResource.setCreateDatetime(
-          dateFormat.format(invoice.getCreateDatetime()));
+          simpleDateFormat2.format(invoice.getCreateDatetime()));
       invoiceResource.setUpdateUser(invoice.getUpdateUser());
       invoiceResource.setUpdateDatetime(
-          dateFormat.format(invoice.getUpdateDatetime()));
+          simpleDateFormat2.format(invoice.getUpdateDatetime()));
 
       URI resourceUri = getInvoiceUri(uriBuilder, String.valueOf(invoice.getInvoiceNo()));
 

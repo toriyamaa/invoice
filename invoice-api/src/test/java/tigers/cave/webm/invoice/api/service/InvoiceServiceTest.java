@@ -2,11 +2,14 @@ package tigers.cave.webm.invoice.api.service;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -15,16 +18,24 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import tigers.cave.webm.invoice.api.common.ApiProperties;
 import tigers.cave.webm.invoice.api.common.ApplicationException;
 import tigers.cave.webm.invoice.api.resource.InvoiceDetailResource;
+import tigers.cave.webm.invoice.api.resource.InvoiceListResource;
+import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResource;
+import tigers.cave.webm.invoice.api.resource.InvoiceRegistrationResultResource;
+import tigers.cave.webm.invoice.api.resource.InvoiceResource;
 import tigers.cave.webm.invoice.api.resource.OrderResource;
+import tigers.cave.webm.invoice.api.resource.query.InvoiceListResourceQuery;
 import tigers.cave.webm.invoice.dao.model.Client;
 import tigers.cave.webm.invoice.dao.model.Invoice;
 import tigers.cave.webm.invoice.dao.model.Order;
+import tigers.cave.webm.invoice.dao.repository.ClientRepository;
 import tigers.cave.webm.invoice.dao.repository.InvoiceRepository;
 import tigers.cave.webm.invoice.dao.repository.OrderRepository;
+import tigers.cave.webm.invoice.dao.repository.criteria.InvoiceCriteria;
 
 /**
  * The Class InvoiceServiceTest.
@@ -44,71 +55,17 @@ public class InvoiceServiceTest {
   @Mock
   OrderRepository orderRepository;
 
+  /** The client repository. */
+  @Mock
+  ClientRepository clientRepository;
+
   /** The api properties. */
   @Mock
   ApiProperties apiProperties;
 
-  /** The Constant INVOICE_NO. */
-  private static final int DEFAULT_INVOICE_NO = 10000;
-
-  /** The Constant CLIENT_NO. */
-  private static final int DEFAULTCLIENT_NO = 1000;
-
-  /** The Constant CLIENT_CHARGE_LAST_NAME. */
-  private static final String DEFAULT_CLIENT_CHARGE_LAST_NAME = "LastName";
-
-  /** The Constant CHARGE_FIRST_NAME. */
-  private static final String DEFAULT_CHARGE_FIRST_NAME = "FirstName";
-
-  /** The Constant CLIENT_NAME. */
-  private static final String DEFAULT_CLIENT_NAME = "ClientName";
-
-  /** The Constant CLIENT_ADDRESS. */
-  private static final String DEFAULT_CLIENT_ADDRESS = "ClientAddress";
-
-  /** The Constant CLIENT_TEL. */
-  private static final String DEFAULT_CLIENT_TEL = "0000-000-000";
-
-  /** The Constant CLIENT_FAX. */
-  private static final String DEFAULT_CLIENT_FAX = "1111-111-111";
-
-  /** The Constant INVOICE_STATUS. */
-  private static final String DEFAULT_INVOICE_STATUS = "10";
-
-  /** The Constant INVOICE_TITLE. */
-  private static final String DEFAULT_INVOICE_TITLE = "testInvoiceTitle";
-
-  /** The Constant INVOICE_NOTE. */
-  private static final String DEFAULT_INVOICE_NOTE = "testInvoiceNote";
-
-  /** The Constant CREATE_USER. */
-  private static final String DEFAULT_CREATE_USER = "testCreateUser";
-
-  /** The Constant UPDATE_USER. */
-  private static final String DEFAULT_UPDATE_USER = "testUpdateUser";
-
-  /** The Constant INVOICE_AMT. */
-  private static final int DEFAULT_INVOICE_AMT = 100;
-
-  /** The Constant TAX_AMT. */
-  private static final int DEFAULT_TAX_AMT = 108;
-
-  /** The Constant DEFAULT_ITEM_NO. */
-  private static final int DEFAULT_ITEM_NO = 500000;
-
-  /** The Constant DEFAULT_ITEM_NAME. */
-  private static final String DEFAULT_ITEM_NAME = "itemName";
-
-  /** The Constant DEFAULT_ITEM_TYPE. */
-  private static final String DEFAULT_ITEM_TYPE = "10";
-
-  /** The Constant DEFAULT_ITEM_PRICE. */
-  private static final int DEFAULT_ITEM_PRICE = 500;
-
-  /** The Constant DEFAULT_ITEM_COUNT. */
-  private static final int DEFAULT_ITEM_COUNT = 10;
-
   /**
+   * 【findInvoiceメソッドのテスト】
+   *
    * 請求書データ取得失敗時のエラーハンドリング
    *
    * 以下の値を持つApplicationExceptionが返却されること
@@ -123,6 +80,7 @@ public class InvoiceServiceTest {
 
     try {
       service.findInvoice("1000");
+      fail("ERROR");
     } catch (ApplicationException e) {
 
       assertThat(e.getDetailList().size(), is(1));
@@ -134,6 +92,8 @@ public class InvoiceServiceTest {
   }
 
   /**
+   * 【findInvoiceメソッドのテスト】
+   *
    * 請求書取得レスポンス確認
    * ※注文実績の一覧が0件の場合.
    */
@@ -141,14 +101,14 @@ public class InvoiceServiceTest {
   public void testFindInvoice() {
 
     //モック用Clientデータ作成
-    Client testClient = getDefaultClient();
+    Client mockClient = getDefaultClient();
 
     //モック用Invoiceデータ作成
-    Invoice testInvoice = getDefaultInvoice();
-    testInvoice.setClientTbl(testClient);
+    Invoice mockInvoice = getDefaultInvoice();
+    mockInvoice.setClientTbl(mockClient);
 
     //モック作成
-    doReturn(testInvoice).when(invoiceRepository).findByInvoiceNo(10000, "0");
+    doReturn(mockInvoice).when(invoiceRepository).findByInvoiceNo(10000, "0");
     doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
     doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
     doReturn(new ArrayList<Order>()).when(orderRepository).findByClientNoAndInvoiceTerm(
@@ -161,37 +121,40 @@ public class InvoiceServiceTest {
 
     //テスト期待値作成
     InvoiceDetailResource expectedInvoiceDetailResource = new InvoiceDetailResource();
-    expectedInvoiceDetailResource.setInvoiceNo(String.valueOf(DEFAULT_INVOICE_NO));
-    expectedInvoiceDetailResource.setClientNo(String.valueOf(DEFAULTCLIENT_NO));
-    expectedInvoiceDetailResource.setClientChargeName(DEFAULT_CLIENT_CHARGE_LAST_NAME + DEFAULT_CHARGE_FIRST_NAME);
-    expectedInvoiceDetailResource.setClientName(DEFAULT_CLIENT_NAME);
-    expectedInvoiceDetailResource.setClientAddress(DEFAULT_CLIENT_ADDRESS);
-    expectedInvoiceDetailResource.setClientTel(DEFAULT_CLIENT_TEL);
-    expectedInvoiceDetailResource.setClientFax(DEFAULT_CLIENT_FAX);
-    expectedInvoiceDetailResource.setInvoiceStatusCode(DEFAULT_INVOICE_STATUS);
+    expectedInvoiceDetailResource.setInvoiceNo(String.valueOf(10000));
+    expectedInvoiceDetailResource.setClientNo(String.valueOf(1000));
+    expectedInvoiceDetailResource.setClientChargeName("LastName" + "FirstName");
+    expectedInvoiceDetailResource.setClientName("ClientName");
+    expectedInvoiceDetailResource.setClientAddress("ClientAddress");
+    expectedInvoiceDetailResource.setClientTel("0000-000-000");
+    expectedInvoiceDetailResource.setClientFax("1111-111-111");
+    expectedInvoiceDetailResource.setInvoiceStatusCode("10");
     expectedInvoiceDetailResource.setInvoiceStatus("新規作成");
     expectedInvoiceDetailResource.setInvoiceCreateDate("2018-01-01");
-    expectedInvoiceDetailResource.setInvoiceTitle(DEFAULT_INVOICE_TITLE);
-    expectedInvoiceDetailResource.setInvoiceAmt(String.valueOf(DEFAULT_INVOICE_AMT));
-    expectedInvoiceDetailResource.setTaxAmt(String.valueOf(DEFAULT_TAX_AMT));
+    expectedInvoiceDetailResource.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceDetailResource.setInvoiceAmt(String.valueOf(100));
+    expectedInvoiceDetailResource.setTaxAmt(String.valueOf(108));
     expectedInvoiceDetailResource.setInvoiceStartDate("2018-01-02");
     expectedInvoiceDetailResource.setInvoiceEndDate("2018-01-03");
-    expectedInvoiceDetailResource.setInvoiceNote(DEFAULT_INVOICE_NOTE);
-    expectedInvoiceDetailResource.setCreateUser(DEFAULT_CREATE_USER);
-    expectedInvoiceDetailResource.setCreateDatetime("2018-01-04");
-    expectedInvoiceDetailResource.setUpdateUser(DEFAULT_UPDATE_USER);
-    expectedInvoiceDetailResource.setUpdateDatetime("2018-01-05");
+    expectedInvoiceDetailResource.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceDetailResource.setCreateUser("testCreateUser");
+    expectedInvoiceDetailResource.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceDetailResource.setUpdateUser("testUpdateUser");
+    expectedInvoiceDetailResource.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
     expectedInvoiceDetailResource.setOrdersCount("0");
     expectedInvoiceDetailResource.setOrders(new ArrayList<OrderResource>());
 
     try {
-      assertThat(service.findInvoice("10000"), is(samePropertyValuesAs(expectedInvoiceDetailResource)));
+      assertThat(service.findInvoice("10000"),
+          is(samePropertyValuesAs(expectedInvoiceDetailResource)));
     } catch (ApplicationException e) {
       fail("ERROR");
     }
   }
 
   /**
+   * 【findInvoiceメソッドのテスト】
+   *
    * 請求書取得レスポンス確認
    * ※注文実績の一覧が複数件の場合.
    */
@@ -199,20 +162,20 @@ public class InvoiceServiceTest {
   public void testFindInvoice2() {
 
     //モック用Clientデータ作成
-    Client testClient = getDefaultClient();
+    Client mockClient = getDefaultClient();
 
     //モック用Invoiceデータ作成
-    Invoice testInvoice = getDefaultInvoice();
-    testInvoice.setClientTbl(testClient);
+    Invoice mockInvoice = getDefaultInvoice();
+    mockInvoice.setClientTbl(mockClient);
 
     //モック用Orderデータ作成
-    List<Order> testOrderList = getDefaultOrderList(2);
+    List<Order> mockOrderList = getDefaultOrderList(2);
 
     //モック作成
-    doReturn(testInvoice).when(invoiceRepository).findByInvoiceNo(10000, "0");
+    doReturn(mockInvoice).when(invoiceRepository).findByInvoiceNo(10000, "0");
     doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
     doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
-    doReturn(testOrderList).when(orderRepository).findByClientNoAndInvoiceTerm(
+    doReturn(mockOrderList).when(orderRepository).findByClientNoAndInvoiceTerm(
         1000,
         Date.from(
             (LocalDate.of(2018, 1, 2).atStartOfDay(ZoneId.systemDefault()).toInstant())),
@@ -222,26 +185,26 @@ public class InvoiceServiceTest {
 
     //テスト期待値作成
     InvoiceDetailResource expectedInvoiceDetailResource = new InvoiceDetailResource();
-    expectedInvoiceDetailResource.setInvoiceNo(String.valueOf(DEFAULT_INVOICE_NO));
-    expectedInvoiceDetailResource.setClientNo(String.valueOf(DEFAULTCLIENT_NO));
-    expectedInvoiceDetailResource.setClientChargeName(DEFAULT_CLIENT_CHARGE_LAST_NAME + DEFAULT_CHARGE_FIRST_NAME);
-    expectedInvoiceDetailResource.setClientName(DEFAULT_CLIENT_NAME);
-    expectedInvoiceDetailResource.setClientAddress(DEFAULT_CLIENT_ADDRESS);
-    expectedInvoiceDetailResource.setClientTel(DEFAULT_CLIENT_TEL);
-    expectedInvoiceDetailResource.setClientFax(DEFAULT_CLIENT_FAX);
-    expectedInvoiceDetailResource.setInvoiceStatusCode(DEFAULT_INVOICE_STATUS);
+    expectedInvoiceDetailResource.setInvoiceNo(String.valueOf(10000));
+    expectedInvoiceDetailResource.setClientNo(String.valueOf(1000));
+    expectedInvoiceDetailResource.setClientChargeName("LastName" + "FirstName");
+    expectedInvoiceDetailResource.setClientName("ClientName");
+    expectedInvoiceDetailResource.setClientAddress("ClientAddress");
+    expectedInvoiceDetailResource.setClientTel("0000-000-000");
+    expectedInvoiceDetailResource.setClientFax("1111-111-111");
+    expectedInvoiceDetailResource.setInvoiceStatusCode("10");
     expectedInvoiceDetailResource.setInvoiceStatus("新規作成");
     expectedInvoiceDetailResource.setInvoiceCreateDate("2018-01-01");
-    expectedInvoiceDetailResource.setInvoiceTitle(DEFAULT_INVOICE_TITLE);
-    expectedInvoiceDetailResource.setInvoiceAmt(String.valueOf(DEFAULT_INVOICE_AMT));
-    expectedInvoiceDetailResource.setTaxAmt(String.valueOf(DEFAULT_TAX_AMT));
+    expectedInvoiceDetailResource.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceDetailResource.setInvoiceAmt(String.valueOf(100));
+    expectedInvoiceDetailResource.setTaxAmt(String.valueOf(108));
     expectedInvoiceDetailResource.setInvoiceStartDate("2018-01-02");
     expectedInvoiceDetailResource.setInvoiceEndDate("2018-01-03");
-    expectedInvoiceDetailResource.setInvoiceNote(DEFAULT_INVOICE_NOTE);
-    expectedInvoiceDetailResource.setCreateUser(DEFAULT_CREATE_USER);
-    expectedInvoiceDetailResource.setCreateDatetime("2018-01-04");
-    expectedInvoiceDetailResource.setUpdateUser(DEFAULT_UPDATE_USER);
-    expectedInvoiceDetailResource.setUpdateDatetime("2018-01-05");
+    expectedInvoiceDetailResource.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceDetailResource.setCreateUser("testCreateUser");
+    expectedInvoiceDetailResource.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceDetailResource.setUpdateUser("testUpdateUser");
+    expectedInvoiceDetailResource.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
     expectedInvoiceDetailResource.setOrdersCount("2");
 
     OrderResource orderResource = new OrderResource();
@@ -270,8 +233,540 @@ public class InvoiceServiceTest {
     expectedInvoiceDetailResource.setOrders(orderResourceList);
 
     try {
-      assertThat(service.findInvoice("10000"), is(samePropertyValuesAs(expectedInvoiceDetailResource)));
+      assertThat(service.findInvoice("10000"),
+          is(samePropertyValuesAs(expectedInvoiceDetailResource)));
     } catch (ApplicationException e) {
+      fail("ERROR");
+    }
+  }
+
+  /**
+   * 【findAllInvoicesByCriteriaメソッドのテスト】
+   *
+   * 請求書一覧取得の確認
+   *
+   * [条件]
+   * ・絞り込み条件なし
+   *
+   * [結果]
+   * ・取得結果０件
+   *
+   *
+   */
+  @Test
+  public void testFindAllInvoicesByCriteria() {
+
+    //モック作成
+    doReturn(new ArrayList<Invoice>()).when(invoiceRepository).findByCriteria(anyObject());
+    doReturn(0L).when(invoiceRepository).countAllByCriteria(anyObject());
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+    doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
+    doReturn("1").when(apiProperties).getStartDefaultValue();
+    doReturn("10").when(apiProperties).getMaxCountDefaultValue();
+
+    //テスト期待値作成
+    InvoiceListResource expectedInvoiceListResource = new InvoiceListResource();
+    expectedInvoiceListResource.setInvoicesMaxCount("0");
+    expectedInvoiceListResource.setStart("1");
+    expectedInvoiceListResource.setInvoicesCount("0");
+    expectedInvoiceListResource.setInvoices(new ArrayList<InvoiceResource>());
+
+    try {
+      assertThat(
+          service.findAllInvoicesByCriteria(
+              new InvoiceListResourceQuery(),
+              UriComponentsBuilder.newInstance()),
+          is(samePropertyValuesAs(expectedInvoiceListResource)));
+    } catch (Exception e) {
+      fail("ERROR");
+    }
+
+  }
+
+  /**
+   * 【findAllInvoicesByCriteriaメソッドのテスト】
+   *
+   * 請求書一覧取得の確認
+   *
+   * [条件]
+   * ・絞り込み条件なし
+   *
+   * [結果]
+   * ・取得結果2件
+   *
+   *
+   */
+  @Test
+  public void testFindAllInvoicesByCriteria2() {
+
+    //モック用Clientデータ作成
+    Client mockClient = getDefaultClient();
+
+    //モック用Invoiceデータ作成
+    Invoice mockInvoice = getDefaultInvoice();
+    Invoice mockInvoice2 = getDefaultInvoice();
+    mockInvoice2.setInvoiceNo(mockInvoice.getInvoiceNo() + 1);
+    mockInvoice.setClientTbl(mockClient);
+    mockInvoice2.setClientTbl(mockClient);
+    List<Invoice> mockInvoiceList = Arrays.asList(mockInvoice, mockInvoice2);
+
+    //モック作成
+    doReturn(mockInvoiceList).when(invoiceRepository).findByCriteria(anyObject());
+    doReturn(2L).when(invoiceRepository).countAllByCriteria(anyObject());
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+    doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
+    doReturn("1").when(apiProperties).getStartDefaultValue();
+    doReturn("10").when(apiProperties).getMaxCountDefaultValue();
+
+    //テスト期待値作成
+    InvoiceListResource expectedInvoiceListResource = new InvoiceListResource();
+    expectedInvoiceListResource.setInvoicesMaxCount("2");
+    expectedInvoiceListResource.setStart("1");
+    expectedInvoiceListResource.setInvoicesCount("2");
+
+    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
+
+    InvoiceResource expectedInvoiceResource = new InvoiceResource();
+    expectedInvoiceResource.setInvoiceNo("10000");
+    expectedInvoiceResource.setClientNo("1000");
+    expectedInvoiceResource.setClientChargeName("LastNameFirstName");
+    expectedInvoiceResource.setClientName("ClientName");
+    expectedInvoiceResource.setInvoiceStatusCode("10");
+    expectedInvoiceResource.setInvoiceStatus("新規作成");
+    expectedInvoiceResource.setInvoiceCreateDate("2018-01-01");
+    expectedInvoiceResource.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceResource.setInvoiceAmt("100");
+    expectedInvoiceResource.setTaxAmt("108");
+    expectedInvoiceResource.setInvoiceStartDate("2018-01-02");
+    expectedInvoiceResource.setInvoiceEndDate("2018-01-03");
+    expectedInvoiceResource.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceResource.setCreateUser("testCreateUser");
+    expectedInvoiceResource.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceResource.setUpdateUser("testUpdateUser");
+    expectedInvoiceResource.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
+    expectedInvoiceResource.setUrl("http://localhost:8080/api/invoices/10000");
+
+    InvoiceResource expectedInvoiceResource2 = new InvoiceResource();
+    expectedInvoiceResource2.setInvoiceNo("10001");
+    expectedInvoiceResource2.setClientNo("1000");
+    expectedInvoiceResource2.setClientChargeName("LastNameFirstName");
+    expectedInvoiceResource2.setClientName("ClientName");
+    expectedInvoiceResource2.setInvoiceStatusCode("10");
+    expectedInvoiceResource2.setInvoiceStatus("新規作成");
+    expectedInvoiceResource2.setInvoiceCreateDate("2018-01-01");
+    expectedInvoiceResource2.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceResource2.setInvoiceAmt("100");
+    expectedInvoiceResource2.setTaxAmt("108");
+    expectedInvoiceResource2.setInvoiceStartDate("2018-01-02");
+    expectedInvoiceResource2.setInvoiceEndDate("2018-01-03");
+    expectedInvoiceResource2.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceResource2.setCreateUser("testCreateUser");
+    expectedInvoiceResource2.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceResource2.setUpdateUser("testUpdateUser");
+    expectedInvoiceResource2.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
+    expectedInvoiceResource2.setUrl("http://localhost:8080/api/invoices/10001");
+
+    expectedInvoiceResourceList.add(expectedInvoiceResource);
+    expectedInvoiceResourceList.add(expectedInvoiceResource2);
+
+    expectedInvoiceListResource.setInvoices(expectedInvoiceResourceList);
+
+    //findAllInvoicesByCriteriaメソッドの引数作成
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+
+      assertThat(
+          service.findAllInvoicesByCriteria(
+              new InvoiceListResourceQuery(),
+              testUri),
+          is(samePropertyValuesAs(expectedInvoiceListResource)));
+
+    } catch (Exception e) {
+      fail("ERROR");
+    }
+
+  }
+
+  /**
+   * 【findAllInvoicesByCriteriaメソッドのテスト】
+   *
+   * 請求書一覧取得の確認
+   *
+   * [条件]
+   * ・絞り込み条件すべて指定
+   *
+   * [結果]
+   * ・取得結果2件
+   *
+   *
+   */
+  @Test
+  public void testFindAllInvoicesByCriteria3() {
+
+    //モック用Clientデータ作成
+    Client mockClient = getDefaultClient();
+
+    //モック用Invoiceデータ作成
+    Invoice mockInvoice = getDefaultInvoice();
+    Invoice mockInvoice2 = getDefaultInvoice();
+    mockInvoice2.setInvoiceNo(mockInvoice.getInvoiceNo() + 1);
+    mockInvoice.setClientTbl(mockClient);
+    mockInvoice2.setClientTbl(mockClient);
+    List<Invoice> mockInvoiceList = Arrays.asList(mockInvoice, mockInvoice2);
+
+    //モックに渡す引数作成
+    InvoiceCriteria mockInvoiceCriteria = new InvoiceCriteria();
+    mockInvoiceCriteria.setStart(1);
+    mockInvoiceCriteria.setMaxCount(2);
+    mockInvoiceCriteria.setClientNo(1000);
+    mockInvoiceCriteria.setInvoiceStatus("10");
+    mockInvoiceCriteria.setInvoiceDateMin(
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
+    mockInvoiceCriteria.setInvoiceDateMax(
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
+
+    //モック作成
+    doReturn(mockInvoiceList).when(invoiceRepository).findByCriteria(mockInvoiceCriteria);
+    doReturn(5L).when(invoiceRepository).countAllByCriteria(mockInvoiceCriteria);
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+    doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
+    doReturn("1").when(apiProperties).getStartDefaultValue();
+    doReturn("10").when(apiProperties).getMaxCountDefaultValue();
+
+    //テスト期待値作成
+    InvoiceListResource expectedInvoiceListResource = new InvoiceListResource();
+    expectedInvoiceListResource.setInvoicesMaxCount("5");
+    expectedInvoiceListResource.setStart("2");
+    expectedInvoiceListResource.setInvoicesCount("2");
+
+    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
+
+    InvoiceResource expectedInvoiceResource = new InvoiceResource();
+    expectedInvoiceResource.setInvoiceNo("10000");
+    expectedInvoiceResource.setClientNo("1000");
+    expectedInvoiceResource.setClientChargeName("LastNameFirstName");
+    expectedInvoiceResource.setClientName("ClientName");
+    expectedInvoiceResource.setInvoiceStatusCode("10");
+    expectedInvoiceResource.setInvoiceStatus("新規作成");
+    expectedInvoiceResource.setInvoiceCreateDate("2018-01-01");
+    expectedInvoiceResource.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceResource.setInvoiceAmt("100");
+    expectedInvoiceResource.setTaxAmt("108");
+    expectedInvoiceResource.setInvoiceStartDate("2018-01-02");
+    expectedInvoiceResource.setInvoiceEndDate("2018-01-03");
+    expectedInvoiceResource.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceResource.setCreateUser("testCreateUser");
+    expectedInvoiceResource.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceResource.setUpdateUser("testUpdateUser");
+    expectedInvoiceResource.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
+    expectedInvoiceResource.setUrl("http://localhost:8080/api/invoices/10000");
+
+    InvoiceResource expectedInvoiceResource2 = new InvoiceResource();
+    expectedInvoiceResource2.setInvoiceNo("10001");
+    expectedInvoiceResource2.setClientNo("1000");
+    expectedInvoiceResource2.setClientChargeName("LastNameFirstName");
+    expectedInvoiceResource2.setClientName("ClientName");
+    expectedInvoiceResource2.setInvoiceStatusCode("10");
+    expectedInvoiceResource2.setInvoiceStatus("新規作成");
+    expectedInvoiceResource2.setInvoiceCreateDate("2018-01-01");
+    expectedInvoiceResource2.setInvoiceTitle("testInvoiceTitle");
+    expectedInvoiceResource2.setInvoiceAmt("100");
+    expectedInvoiceResource2.setTaxAmt("108");
+    expectedInvoiceResource2.setInvoiceStartDate("2018-01-02");
+    expectedInvoiceResource2.setInvoiceEndDate("2018-01-03");
+    expectedInvoiceResource2.setInvoiceNote("testInvoiceNote");
+    expectedInvoiceResource2.setCreateUser("testCreateUser");
+    expectedInvoiceResource2.setCreateDatetime("2018-01-04T00:00:00.000+0900");
+    expectedInvoiceResource2.setUpdateUser("testUpdateUser");
+    expectedInvoiceResource2.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
+    expectedInvoiceResource2.setUrl("http://localhost:8080/api/invoices/10001");
+
+    expectedInvoiceResourceList.add(expectedInvoiceResource);
+    expectedInvoiceResourceList.add(expectedInvoiceResource2);
+
+    expectedInvoiceListResource.setInvoices(expectedInvoiceResourceList);
+
+    //findAllInvoicesByCriteriaメソッドの引数作成
+    InvoiceListResourceQuery testQuery = new InvoiceListResourceQuery();
+    testQuery.setStart("2");
+    testQuery.setMaxCount("2");
+    testQuery.setClientNo("1000");
+    testQuery.setInvoiceStatus("10");
+    testQuery.setInvoiceDateMin("2018-01-01");
+    testQuery.setInvoiceDateMax("2018-02-01");
+
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+
+      assertThat(
+          service.findAllInvoicesByCriteria(
+              testQuery,
+              testUri),
+          is(samePropertyValuesAs(expectedInvoiceListResource)));
+
+    } catch (Exception e) {
+      fail("ERROR");
+    }
+
+  }
+
+  /**
+   * 【createInvoiceメソッドのテスト】
+   *
+   * 請求書データ取得失敗時のエラーハンドリング
+   *
+   * 以下の値を持つApplicationExceptionが返却されること
+   * ・NotExist
+   * ・messageOption：new String[] {"clientNo"}
+   * ・field：clientNo.
+   */
+  @Test
+  public void testErrCheckCreateInvoice() {
+
+    //モック作成
+    doReturn(null).when(clientRepository).findByClientNo(1000, "0");
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+
+    //createInvoiceメソッドの引数作成
+    InvoiceRegistrationResource testNewInvoice = new InvoiceRegistrationResource();
+    testNewInvoice.setClientNo("1000");
+    testNewInvoice.setInvoiceStartDate("2018-01-01");
+    testNewInvoice.setInvoiceEndDate("2018-02-01");
+    testNewInvoice.setCreateUser("testCreateUser");
+
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+      service.createInvoice(testNewInvoice, testUri);
+      fail("ERROR");
+    } catch (ApplicationException e) {
+
+      assertThat(e.getDetailList().size(), is(1));
+      assertThat(e.getDetailList().get(0).getCode(), is("NotExist"));
+      assertThat(e.getDetailList().get(0).getMessageOption(), is(new String[] { "clientNo" }));
+      assertThat(e.getDetailList().get(0).getField(), is("clientNo"));
+
+    } catch (Exception e) {
+      fail("ERROR(予期せぬ例外)");
+    }
+  }
+
+  /**
+   * 【createInvoiceメソッドのテスト】
+   *
+   * 請求書期間重複時のエラーハンドリング
+   *
+   * 以下の値を持つApplicationExceptionが返却されること
+   * ・InvoiceDuplication
+   * ・messageOption：new String[] {}
+   * ・field："".
+   */
+  @Test
+  public void testErrCheckCreateInvoice2() {
+
+    //モック用Clientデータ作成
+    Client mockClient = getDefaultClient();
+
+    //モック用Invoiceデータ作成
+    List<Invoice> mockInvoiceList = Arrays.asList(new Invoice());
+
+    //モック作成
+    doReturn(mockClient).when(clientRepository).findByClientNo(1000, "0");
+    doReturn(mockInvoiceList).when(invoiceRepository).findByClientNoAndInvoiceTerm(
+        1000,
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        "0");
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+
+    //createInvoiceメソッドの引数作成
+    InvoiceRegistrationResource testNewInvoice = new InvoiceRegistrationResource();
+    testNewInvoice.setClientNo("1000");
+    testNewInvoice.setInvoiceStartDate("2018-01-01");
+    testNewInvoice.setInvoiceEndDate("2018-02-01");
+    testNewInvoice.setCreateUser("testCreateUser");
+
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+      service.createInvoice(testNewInvoice, testUri);
+      fail("ERROR");
+    } catch (ApplicationException e) {
+
+      assertThat(e.getDetailList().size(), is(1));
+      assertThat(e.getDetailList().get(0).getCode(), is("InvoiceDuplication"));
+      assertThat(e.getDetailList().get(0).getMessageOption(), is(new String[] {}));
+      assertThat(e.getDetailList().get(0).getField(), is(""));
+
+    } catch (Exception e) {
+      fail("ERROR(予期せぬ例外)");
+    }
+  }
+
+  /**
+   * 【createInvoiceメソッドのテスト】
+   *
+   * 注文実績データ取得失敗時のエラーハンドリング
+   *
+   * 以下の値を持つApplicationExceptionが返却されること
+   * ・OrderNotExist
+   * ・messageOption：new String[] {}
+   * ・field："".
+   */
+  @Test
+  public void testErrCheckCreateInvoice3() {
+
+    //モック用Clientデータ作成
+    Client mockClient = getDefaultClient();
+
+    //モック用Invoiceデータ作成
+    List<Invoice> mockInvoiceList = new ArrayList<Invoice>();
+
+    //モック用Orderデータ作成
+    List<Order> mockOrderList = new ArrayList<Order>();
+
+    //モック作成
+    doReturn(mockClient).when(clientRepository).findByClientNo(1000, "0");
+    doReturn(mockInvoiceList).when(invoiceRepository).findByClientNoAndInvoiceTerm(
+        1000,
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        "0");
+    doReturn(mockOrderList).when(orderRepository).findByClientNoAndInvoiceTerm(
+        1000,
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        "0");
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+
+    //createInvoiceメソッドの引数作成
+    InvoiceRegistrationResource testNewInvoice = new InvoiceRegistrationResource();
+    testNewInvoice.setClientNo("1000");
+    testNewInvoice.setInvoiceStartDate("2018-01-01");
+    testNewInvoice.setInvoiceEndDate("2018-02-01");
+    testNewInvoice.setCreateUser("testCreateUser");
+
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+      service.createInvoice(testNewInvoice, testUri);
+      fail("ERROR");
+    } catch (ApplicationException e) {
+
+      assertThat(e.getDetailList().size(), is(1));
+      assertThat(e.getDetailList().get(0).getCode(), is("OrderNotExist"));
+      assertThat(e.getDetailList().get(0).getMessageOption(), is(new String[] {}));
+      assertThat(e.getDetailList().get(0).getField(), is(""));
+
+    } catch (Exception e) {
+      fail("ERROR(予期せぬ例外)");
+    }
+  }
+
+  /**
+   * 【createInvoiceメソッドのテスト】
+   *
+   * 請求書データ登録の確認
+   *
+   * [条件]
+   * ・条件すべて指定
+   *
+   * [結果]
+   * InvoiceRegistrationResultResourceの以下の項目が期待値であること
+   * ・invoiceNo
+   * ・url
+   *
+   */
+  @Test
+  public void testCreateInvoice() {
+
+    //モック用Clientデータ作成
+    Client mockClient = getDefaultClient();
+
+    //モック用Invoiceデータ作成
+    List<Invoice> mockInvoiceList = new ArrayList<Invoice>();
+    Invoice mockInvoice = getDefaultInvoice();
+    mockInvoice.setClientTbl(mockClient);
+    mockInvoice.setInvoiceStatus("10");
+    mockInvoice.setInvoiceCreateDate(new Date());
+    mockInvoice.setInvoiceTitle("title");
+    mockInvoice.setInvoiceAmt(10000);
+    mockInvoice.setTaxAmt(10800);
+    mockInvoice.setInvoiceStartDate(
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
+    mockInvoice.setInvoiceEndDate(
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
+    mockInvoice.setInvoiceNote("note");
+    mockInvoice.setCreateUser("testCreateUser");
+    mockInvoice.setCreateDatetime(new Date());
+    mockInvoice.setUpdateUser("testCreateUser");
+    mockInvoice.setUpdateDatetime(new Date());
+    mockInvoice.setDelFlg("0");
+
+    //モック用Orderデータ作成
+    List<Order> mockOrderList = getDefaultOrderList(2);
+
+    //モック作成
+    doReturn(mockClient).when(clientRepository).findByClientNo(1000, "0");
+    doReturn(mockInvoice).when(invoiceRepository).save(mockInvoice);
+    doReturn(mockInvoiceList).when(invoiceRepository).findByClientNoAndInvoiceTerm(
+        1000,
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        "0");
+    doReturn(mockOrderList).when(orderRepository).findByClientNoAndInvoiceTerm(
+        1000,
+        Date.from(
+            (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        Date.from(
+            (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
+        "0");
+    doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
+    doReturn("1.08").when(apiProperties).getConsumptionTax();
+
+    //テスト期待値作成
+    InvoiceRegistrationResultResource expectedInvoiceRegistrationResultResource = new InvoiceRegistrationResultResource();
+    expectedInvoiceRegistrationResultResource.setInvoiceNo("0");
+    expectedInvoiceRegistrationResultResource.setUrl("http://localhost:8080/api/invoices/0");
+
+    //createInvoiceメソッドの引数作成
+    InvoiceRegistrationResource testNewInvoice = new InvoiceRegistrationResource();
+    testNewInvoice.setClientNo("1000");
+    testNewInvoice.setInvoiceTitle("title");
+    testNewInvoice.setInvoiceStartDate("2018-01-01");
+    testNewInvoice.setInvoiceEndDate("2018-02-01");
+    testNewInvoice.setInvoiceNote("note");
+    testNewInvoice.setCreateUser("testCreateUser");
+
+    UriComponentsBuilder testUri = UriComponentsBuilder.newInstance();
+    testUri.uri(URI.create("http://localhost:8080/"));
+
+    try {
+
+      assertThat(
+          service.createInvoice(testNewInvoice, testUri),
+          is(samePropertyValuesAs(expectedInvoiceRegistrationResultResource)));
+
+    } catch (Exception e) {
       fail("ERROR");
     }
   }
@@ -282,6 +777,14 @@ public class InvoiceServiceTest {
    * @return the default client
    */
   private Client getDefaultClient() {
+
+    int DEFAULTCLIENT_NO = 1000;
+    String DEFAULT_CLIENT_CHARGE_LAST_NAME = "LastName";
+    String DEFAULT_CHARGE_FIRST_NAME = "FirstName";
+    String DEFAULT_CLIENT_NAME = "ClientName";
+    String DEFAULT_CLIENT_ADDRESS = "ClientAddress";
+    String DEFAULT_CLIENT_TEL = "0000-000-000";
+    String DEFAULT_CLIENT_FAX = "1111-111-111";
 
     Client defaultClient = new Client();
     defaultClient.setClientNo(DEFAULTCLIENT_NO);
@@ -297,11 +800,20 @@ public class InvoiceServiceTest {
   }
 
   /**
-   * デフォルトのClientデータ.
+   * デフォルトのInvoiceデータ.
    *
    * @return the default invoice
    */
   private Invoice getDefaultInvoice() {
+
+    int DEFAULT_INVOICE_NO = 10000;
+    String DEFAULT_INVOICE_STATUS = "10";
+    String DEFAULT_INVOICE_TITLE = "testInvoiceTitle";
+    String DEFAULT_INVOICE_NOTE = "testInvoiceNote";
+    String DEFAULT_CREATE_USER = "testCreateUser";
+    String DEFAULT_UPDATE_USER = "testUpdateUser";
+    int DEFAULT_INVOICE_AMT = 100;
+    int DEFAULT_TAX_AMT = 108;
 
     Invoice defaultInvoice = new Invoice();
     defaultInvoice.setInvoiceNo(DEFAULT_INVOICE_NO);
@@ -348,10 +860,10 @@ public class InvoiceServiceTest {
 
     List<Order> orderList = new ArrayList<Order>();
 
-    for(int i = 0; i < count; i++) {
+    for (int i = 0; i < count; i++) {
 
       Order order = getDefaultOrder();
-      order.setItemNo(order.getItemNo()+i);
+      order.setItemNo(order.getItemNo() + i);
 
       orderList.add(order);
 
@@ -367,6 +879,12 @@ public class InvoiceServiceTest {
    * @return the default order
    */
   private Order getDefaultOrder() {
+
+    int DEFAULT_ITEM_NO = 500000;
+    String DEFAULT_ITEM_NAME = "itemName";
+    String DEFAULT_ITEM_TYPE = "10";
+    int DEFAULT_ITEM_PRICE = 500;
+    int DEFAULT_ITEM_COUNT = 10;
 
     Order defaultOrder = new Order();
     defaultOrder.setItemNo(DEFAULT_ITEM_NO);

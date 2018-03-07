@@ -12,21 +12,22 @@ import tigers.cave.webm.invoice.dao.model.Invoice;
 import tigers.cave.webm.invoice.dao.repository.custom.InvoiceRepositoryCustom;
 
 @Repository
-public interface InvoiceRepository extends JpaRepository<Invoice, Integer>, InvoiceRepositoryCustom {
+public interface InvoiceRepository
+    extends JpaRepository<Invoice, Integer>, InvoiceRepositoryCustom {
 
-	@Query("SELECT i FROM Invoice i WHERE i.delFlg = :notDel AND i.invoiceNo = :invoiceNo ")
-	Invoice findByInvoiceNo(@Param("invoiceNo") int invoiceNo, @Param("notDel") String delFlg);
+  @Query("SELECT i FROM Invoice i WHERE i.delFlg = :notDel AND i.invoiceNo = :invoiceNo ")
+  Invoice findByInvoiceNo(@Param("invoiceNo") int invoiceNo, @Param("notDel") String delFlg);
 
-	@Query("SELECT i "
-			+ "FROM Invoice i "
-			+ "WHERE i.delFlg = :notDel "
-			+ "AND i.clientTbl.clientNo = :clientNo "
-			+ "AND i.invoiceStartDate <= :endDate "
-			+ "AND i.invoiceEndDate >= :startDate ")
-	List<Invoice> findByClientNoAndInvoiceTerm(
-			@Param("clientNo") int clientNo,
-			@Param("startDate") Date startDate,
-			@Param("endDate") Date endDate,
-			@Param("notDel") String delFlg);
+  @Query("SELECT i "
+      + "FROM Invoice i "
+      + "WHERE i.delFlg = :notDel "
+      + "AND i.clientTbl.clientNo = :clientNo "
+      + "AND i.invoiceStartDate <= :endDate "
+      + "AND i.invoiceEndDate >= :startDate ")
+  List<Invoice> findByClientNoAndInvoiceTerm(
+      @Param("clientNo") int clientNo,
+      @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate,
+      @Param("notDel") String delFlg);
 
 }

@@ -13,13 +13,14 @@ import tigers.cave.webm.invoice.dao.model.Order;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
-	@Query("SELECT o "
-			+ "FROM Order o "
-			+ "WHERE o.delFlg = :notDel "
-			+ "AND o.clientTbl.clientNo = :clientNo "
-			+ "AND o.createDatetime BETWEEN :startDate AND :endDate "
-			+ "ORDER BY o.orderNo ASC ")
-	List<Order> findByClientNoAndInvoiceTerm(@Param("clientNo") int clientNo, @Param("startDate") Date startDate,
-			@Param("endDate") Date endDate, @Param("notDel") String delFlg);
+  @Query("SELECT o "
+      + "FROM Order o "
+      + "WHERE o.delFlg = :notDel "
+      + "AND o.clientTbl.clientNo = :clientNo "
+      + "AND o.createDatetime BETWEEN :startDate AND :endDate "
+      + "ORDER BY o.orderNo ASC ")
+  List<Order> findByClientNoAndInvoiceTerm(@Param("clientNo") int clientNo,
+      @Param("startDate") Date startDate,
+      @Param("endDate") Date endDate, @Param("notDel") String delFlg);
 
 }

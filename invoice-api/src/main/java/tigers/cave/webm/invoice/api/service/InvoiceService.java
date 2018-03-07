@@ -365,7 +365,9 @@ public class InvoiceService {
     invoiceRepository.save(invoice);
 
     //登録結果をResourceクラスに設定
-    InvoiceRegistrationResultResource invoiceRegistrationResultResource = new InvoiceRegistrationResultResource();
+    InvoiceRegistrationResultResource invoiceRegistrationResultResource =
+        new InvoiceRegistrationResultResource();
+
     invoiceRegistrationResultResource.setInvoiceNo(String.valueOf(invoice.getInvoiceNo()));
 
     URI resourceUri = getInvoiceUri(uriBuilder, invoiceRegistrationResultResource.getInvoiceNo());

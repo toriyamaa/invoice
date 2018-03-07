@@ -26,63 +26,65 @@ import tigers.cave.webm.invoice.api.validation.Numeric;
 @Validated
 public class InvoiceApiController {
 
-	/** The invoice service. */
-	@Autowired
-	InvoiceService invoiceService;
+  /** The invoice service. */
+  @Autowired
+  InvoiceService invoiceService;
 
-	/**
-	 * Search invoices.
-	 *
-	 * @param invoiceListResourceQuery the invoice list resource query
-	 * @param uriBuilder the uri builder
-	 * @return the invoice list resource
-	 * @throws Exception the exception
-	 */
-	@RequestMapping(method = RequestMethod.GET)
-	public InvoiceListResource searchInvoices(
-			@Validated InvoiceListResourceQuery invoiceListResourceQuery,
-			UriComponentsBuilder uriBuilder) throws Exception {
+  /**
+   * Search invoices.
+   *
+   * @param invoiceListResourceQuery the invoice list resource query
+   * @param uriBuilder the uri builder
+   * @return the invoice list resource
+   * @throws Exception the exception
+   */
+  @RequestMapping(method = RequestMethod.GET)
+  public InvoiceListResource searchInvoices(
+      @Validated InvoiceListResourceQuery invoiceListResourceQuery,
+      UriComponentsBuilder uriBuilder) throws Exception {
 
-		InvoiceListResource invoiceListResource = invoiceService.findAllInvoicesByCriteria(
-				invoiceListResourceQuery,
-				uriBuilder);
+    InvoiceListResource invoiceListResource = invoiceService.findAllInvoicesByCriteria(
+        invoiceListResourceQuery,
+        uriBuilder);
 
-		return invoiceListResource;
-	}
+    return invoiceListResource;
+  }
 
-	/**
-	 * Gets the invoice.
-	 *
-	 * @param invoiceNo the invoice no
-	 * @return the invoice
-	 * @throws ApplicationException
-	 */
-	@RequestMapping(path = "{invoiceNo}", method = RequestMethod.GET)
-	public InvoiceDetailResource getInvoice(
-			@PathVariable @Validated @Numeric String invoiceNo)
-			throws ApplicationException {
+  /**
+   * Gets the invoice.
+   *
+   * @param invoiceNo the invoice no
+   * @return the invoice
+   * @throws ApplicationException the exception
+   */
+  @RequestMapping(path = "{invoiceNo}", method = RequestMethod.GET)
+  public InvoiceDetailResource getInvoice(
+      @PathVariable @Validated @Numeric String invoiceNo)
+      throws ApplicationException {
 
-		InvoiceDetailResource invoiceDetailResource = invoiceService.findInvoice(invoiceNo);
+    InvoiceDetailResource invoiceDetailResource = invoiceService.findInvoice(invoiceNo);
 
-		return invoiceDetailResource;
-	}
+    return invoiceDetailResource;
+  }
 
-	/**
-	 * Creates the invoice.
-	 *
-	 * @param newInvoice the new invoice
-	 * @return the invoice registration result resource
-	 * @throws Exception
-	 */
-	@RequestMapping(method = RequestMethod.POST)
-	public InvoiceRegistrationResultResource createInvoice(
-			@Validated @RequestBody InvoiceRegistrationResource newInvoice,
-			UriComponentsBuilder uriBuilder) throws Exception {
+  /**
+   * Creates the invoice.
+   *
+   * @param newInvoice the new invoice
+   * @param uriBuilder the uri builder
+   * @return the invoice registration result resource
+   * @throws Exception the exception
+   */
+  @RequestMapping(method = RequestMethod.POST)
+  public InvoiceRegistrationResultResource createInvoice(
+      @Validated @RequestBody InvoiceRegistrationResource newInvoice,
+      UriComponentsBuilder uriBuilder) throws Exception {
 
-		InvoiceRegistrationResultResource invoiceRegistrationResultResource = invoiceService.createInvoice(newInvoice,
-				uriBuilder);
+    InvoiceRegistrationResultResource invoiceRegistrationResultResource = invoiceService
+        .createInvoice(newInvoice,
+            uriBuilder);
 
-		return invoiceRegistrationResultResource;
-	}
+    return invoiceRegistrationResultResource;
+  }
 
 }

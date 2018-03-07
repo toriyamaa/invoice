@@ -11,19 +11,19 @@ import lombok.Data;
 @Data
 public class InvoiceListResource implements Serializable {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 6206777908544280961L;
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 6206777908544280961L;
 
-	/** The invoices max count. */
-	private String invoicesMaxCount;
+  /** The invoices max count. */
+  private String invoicesMaxCount;
 
-	/** The start. */
-	private String start;
+  /** The start. */
+  private String start;
 
-	/** The invoices count. */
-	private String invoicesCount;
+  /** The invoices count. */
+  private String invoicesCount;
 
-	/** The invoices. */
-	private List<InvoiceResource> invoices;
+  /** The invoices. */
+  private List<InvoiceResource> invoices;
 
 }

@@ -7,8 +7,8 @@ import tigers.cave.webm.invoice.dao.repository.criteria.InvoiceCriteria;
 
 public interface InvoiceRepositoryCustom {
 
-	List<Invoice> findByCriteria(InvoiceCriteria invoiceCriteria);
+  List<Invoice> findByCriteria(InvoiceCriteria invoiceCriteria);
 
-	long countAllByCriteria(InvoiceCriteria invoiceCriteria);
+  long countAllByCriteria(InvoiceCriteria invoiceCriteria);
 
 }

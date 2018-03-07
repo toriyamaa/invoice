@@ -5,7 +5,7 @@ import java.io.Serializable;
 import lombok.Getter;
 
 /**
- * アプリケーションエラー時の例外クラスの詳細部分
+ * アプリケーションエラー時の例外クラスの詳細部分.
  */
 @Getter
 public class ApplicationExceptionDetail implements Serializable {

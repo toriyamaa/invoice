@@ -12,6 +12,9 @@ import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 import javax.validation.constraints.Pattern;
 
+/**
+ * The Interface InvoiceStatusValid.
+ */
 @Documented
 @Constraint(validatedBy = {})
 @Retention(RUNTIME)
@@ -20,17 +23,41 @@ import javax.validation.constraints.Pattern;
 @Pattern(regexp = "(10|20|30|90)")
 public @interface InvoiceStatusValid {
 
-	String message() default "{tigers.cave.webm.invoice.api.validation.InvoiceStatusValid,message}";
+  /**
+   * Message.
+   *
+   * @return the string
+   */
+  String message() default "{tigers.cave.webm.invoice.api.validation.InvoiceStatusValid,message}";
 
-	Class<?>[] groups() default {};
+  /**
+   * Groups.
+   *
+   * @return the class[]
+   */
+  Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+  /**
+   * Payload.
+   *
+   * @return the class<? extends payload>[]
+   */
+  Class<? extends Payload>[] payload() default {};
 
-	@Documented
-	@Retention(RUNTIME)
-	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
-	public @interface List {
-		InvoiceStatusValid[] value();
-	}
+  /**
+   * The Interface List.
+   */
+  @Documented
+  @Retention(RUNTIME)
+  @Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
+  public @interface List {
+
+    /**
+     * Value.
+     *
+     * @return the invoice status valid[]
+     */
+    InvoiceStatusValid[] value();
+  }
 
 }

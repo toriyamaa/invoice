@@ -12,6 +12,9 @@ import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
 import javax.validation.constraints.Pattern;
 
+/**
+ * The Interface Numeric.
+ */
 @Documented
 @Constraint(validatedBy = {})
 @Retention(RUNTIME)
@@ -20,16 +23,40 @@ import javax.validation.constraints.Pattern;
 @Pattern(regexp = "[0-9]*")
 public @interface Numeric {
 
-	String message() default "{tigers.cave.webm.invoice.api.validation.Numeric,message}";
+  /**
+   * Message.
+   *
+   * @return the string
+   */
+  String message() default "{tigers.cave.webm.invoice.api.validation.Numeric,message}";
 
-	Class<?>[] groups() default {};
+  /**
+   * Groups.
+   *
+   * @return the class[]
+   */
+  Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+  /**
+   * Payload.
+   *
+   * @return the class<? extends payload>[]
+   */
+  Class<? extends Payload>[] payload() default {};
 
-	@Documented
-	@Retention(RUNTIME)
-	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
-	public @interface List {
-		Numeric[] value();
-	}
+  /**
+   * The Interface List.
+   */
+  @Documented
+  @Retention(RUNTIME)
+  @Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE })
+  public @interface List {
+
+    /**
+     * Value.
+     *
+     * @return the numeric[]
+     */
+    Numeric[] value();
+  }
 }

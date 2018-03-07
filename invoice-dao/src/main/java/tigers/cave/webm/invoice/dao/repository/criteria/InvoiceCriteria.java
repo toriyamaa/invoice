@@ -8,18 +8,18 @@ import lombok.Data;
 @Data
 public class InvoiceCriteria implements Serializable {
 
-	private static final long serialVersionUID = -6820592608925699839L;
+  private static final long serialVersionUID = -6820592608925699839L;
 
-	private Integer start;
+  private Integer start;
 
-	private Integer maxCount;
+  private Integer maxCount;
 
-	private Integer clientNo;
+  private Integer clientNo;
 
-	private String invoiceStatus;
+  private String invoiceStatus;
 
-	private Date invoiceDateMin;
+  private Date invoiceDateMin;
 
-	private Date invoiceDateMax;
+  private Date invoiceDateMax;
 
 }

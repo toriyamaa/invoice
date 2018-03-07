@@ -65,9 +65,7 @@ public class InvoiceServiceTest {
 
   /**
    * 【findInvoiceメソッドのテスト】
-   *
    * 請求書データ取得失敗時のエラーハンドリング
-   *
    * 以下の値を持つApplicationExceptionが返却されること
    * ・code：InvoiceNotExist
    * ・messageOption：new String[] {}
@@ -93,7 +91,6 @@ public class InvoiceServiceTest {
 
   /**
    * 【findInvoiceメソッドのテスト】
-   *
    * 請求書取得レスポンス確認
    * ※注文実績の一覧が0件の場合.
    */
@@ -154,7 +151,6 @@ public class InvoiceServiceTest {
 
   /**
    * 【findInvoiceメソッドのテスト】
-   *
    * 請求書取得レスポンス確認
    * ※注文実績の一覧が複数件の場合.
    */
@@ -243,15 +239,13 @@ public class InvoiceServiceTest {
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
    *
-   * 請求書一覧取得の確認
+   *請求書一覧取得の確認.
    *
    * [条件]
    * ・絞り込み条件なし
    *
    * [結果]
    * ・取得結果０件
-   *
-   *
    */
   @Test
   public void testFindAllInvoicesByCriteria() {
@@ -286,15 +280,13 @@ public class InvoiceServiceTest {
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
    *
-   * 請求書一覧取得の確認
+   * 請求書一覧取得の確認.
    *
    * [条件]
    * ・絞り込み条件なし
    *
    * [結果]
    * ・取得結果2件
-   *
-   *
    */
   @Test
   public void testFindAllInvoicesByCriteria2() {
@@ -324,8 +316,6 @@ public class InvoiceServiceTest {
     expectedInvoiceListResource.setStart("1");
     expectedInvoiceListResource.setInvoicesCount("2");
 
-    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
-
     InvoiceResource expectedInvoiceResource = new InvoiceResource();
     expectedInvoiceResource.setInvoiceNo("10000");
     expectedInvoiceResource.setClientNo("1000");
@@ -366,6 +356,7 @@ public class InvoiceServiceTest {
     expectedInvoiceResource2.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
     expectedInvoiceResource2.setUrl("http://localhost:8080/api/invoices/10001");
 
+    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
     expectedInvoiceResourceList.add(expectedInvoiceResource);
     expectedInvoiceResourceList.add(expectedInvoiceResource2);
 
@@ -392,15 +383,13 @@ public class InvoiceServiceTest {
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
    *
-   * 請求書一覧取得の確認
+   * 請求書一覧取得の確認.
    *
    * [条件]
    * ・絞り込み条件すべて指定
    *
    * [結果]
    * ・取得結果2件
-   *
-   *
    */
   @Test
   public void testFindAllInvoicesByCriteria3() {
@@ -414,7 +403,6 @@ public class InvoiceServiceTest {
     mockInvoice2.setInvoiceNo(mockInvoice.getInvoiceNo() + 1);
     mockInvoice.setClientTbl(mockClient);
     mockInvoice2.setClientTbl(mockClient);
-    List<Invoice> mockInvoiceList = Arrays.asList(mockInvoice, mockInvoice2);
 
     //モックに渡す引数作成
     InvoiceCriteria mockInvoiceCriteria = new InvoiceCriteria();
@@ -430,7 +418,9 @@ public class InvoiceServiceTest {
             (LocalDate.of(2018, 2, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
 
     //モック作成
-    doReturn(mockInvoiceList).when(invoiceRepository).findByCriteria(mockInvoiceCriteria);
+    doReturn(Arrays.asList(mockInvoice, mockInvoice2))
+        .when(invoiceRepository)
+        .findByCriteria(mockInvoiceCriteria);
     doReturn(5L).when(invoiceRepository).countAllByCriteria(mockInvoiceCriteria);
     doReturn("yyyy-MM-dd").when(apiProperties).getDateFormat();
     doReturn("yyyy-MM-dd'T'HH:mm:ss.SSSZ").when(apiProperties).getDateTimeFormat();
@@ -442,8 +432,6 @@ public class InvoiceServiceTest {
     expectedInvoiceListResource.setInvoicesMaxCount("5");
     expectedInvoiceListResource.setStart("2");
     expectedInvoiceListResource.setInvoicesCount("2");
-
-    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
 
     InvoiceResource expectedInvoiceResource = new InvoiceResource();
     expectedInvoiceResource.setInvoiceNo("10000");
@@ -485,6 +473,7 @@ public class InvoiceServiceTest {
     expectedInvoiceResource2.setUpdateDatetime("2018-01-05T00:00:00.000+0900");
     expectedInvoiceResource2.setUrl("http://localhost:8080/api/invoices/10001");
 
+    List<InvoiceResource> expectedInvoiceResourceList = new ArrayList<InvoiceResource>();
     expectedInvoiceResourceList.add(expectedInvoiceResource);
     expectedInvoiceResourceList.add(expectedInvoiceResource2);
 
@@ -681,7 +670,7 @@ public class InvoiceServiceTest {
   /**
    * 【createInvoiceメソッドのテスト】
    *
-   * 請求書データ登録の確認
+   * 請求書データ登録の確認.
    *
    * [条件]
    * ・条件すべて指定
@@ -699,7 +688,6 @@ public class InvoiceServiceTest {
     Client mockClient = getDefaultClient();
 
     //モック用Invoiceデータ作成
-    List<Invoice> mockInvoiceList = new ArrayList<Invoice>();
     Invoice mockInvoice = getDefaultInvoice();
     mockInvoice.setClientTbl(mockClient);
     mockInvoice.setInvoiceStatus("10");
@@ -726,7 +714,7 @@ public class InvoiceServiceTest {
     //モック作成
     doReturn(mockClient).when(clientRepository).findByClientNo(1000, "0");
     doReturn(mockInvoice).when(invoiceRepository).save(mockInvoice);
-    doReturn(mockInvoiceList).when(invoiceRepository).findByClientNoAndInvoiceTerm(
+    doReturn(new ArrayList<Invoice>()).when(invoiceRepository).findByClientNoAndInvoiceTerm(
         1000,
         Date.from(
             (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())),
@@ -744,9 +732,9 @@ public class InvoiceServiceTest {
     doReturn("1.08").when(apiProperties).getConsumptionTax();
 
     //テスト期待値作成
-    InvoiceRegistrationResultResource expectedInvoiceRegistrationResultResource = new InvoiceRegistrationResultResource();
-    expectedInvoiceRegistrationResultResource.setInvoiceNo("0");
-    expectedInvoiceRegistrationResultResource.setUrl("http://localhost:8080/api/invoices/0");
+    InvoiceRegistrationResultResource expectedResult = new InvoiceRegistrationResultResource();
+    expectedResult.setInvoiceNo("0");
+    expectedResult.setUrl("http://localhost:8080/api/invoices/0");
 
     //createInvoiceメソッドの引数作成
     InvoiceRegistrationResource testNewInvoice = new InvoiceRegistrationResource();
@@ -764,7 +752,7 @@ public class InvoiceServiceTest {
 
       assertThat(
           service.createInvoice(testNewInvoice, testUri),
-          is(samePropertyValuesAs(expectedInvoiceRegistrationResultResource)));
+          is(samePropertyValuesAs(expectedResult)));
 
     } catch (Exception e) {
       fail("ERROR");
@@ -778,22 +766,14 @@ public class InvoiceServiceTest {
    */
   private Client getDefaultClient() {
 
-    int DEFAULTCLIENT_NO = 1000;
-    String DEFAULT_CLIENT_CHARGE_LAST_NAME = "LastName";
-    String DEFAULT_CHARGE_FIRST_NAME = "FirstName";
-    String DEFAULT_CLIENT_NAME = "ClientName";
-    String DEFAULT_CLIENT_ADDRESS = "ClientAddress";
-    String DEFAULT_CLIENT_TEL = "0000-000-000";
-    String DEFAULT_CLIENT_FAX = "1111-111-111";
-
     Client defaultClient = new Client();
-    defaultClient.setClientNo(DEFAULTCLIENT_NO);
-    defaultClient.setClientChargeLastName(DEFAULT_CLIENT_CHARGE_LAST_NAME);
-    defaultClient.setClientChargeFirstName(DEFAULT_CHARGE_FIRST_NAME);
-    defaultClient.setClientName(DEFAULT_CLIENT_NAME);
-    defaultClient.setClientAddress(DEFAULT_CLIENT_ADDRESS);
-    defaultClient.setClientTel(DEFAULT_CLIENT_TEL);
-    defaultClient.setClientFax(DEFAULT_CLIENT_FAX);
+    defaultClient.setClientNo(1000);
+    defaultClient.setClientChargeLastName("LastName");
+    defaultClient.setClientChargeFirstName("FirstName");
+    defaultClient.setClientName("ClientName");
+    defaultClient.setClientAddress("ClientAddress");
+    defaultClient.setClientTel("0000-000-000");
+    defaultClient.setClientFax("1111-111-111");
 
     return defaultClient;
 
@@ -806,26 +786,17 @@ public class InvoiceServiceTest {
    */
   private Invoice getDefaultInvoice() {
 
-    int DEFAULT_INVOICE_NO = 10000;
-    String DEFAULT_INVOICE_STATUS = "10";
-    String DEFAULT_INVOICE_TITLE = "testInvoiceTitle";
-    String DEFAULT_INVOICE_NOTE = "testInvoiceNote";
-    String DEFAULT_CREATE_USER = "testCreateUser";
-    String DEFAULT_UPDATE_USER = "testUpdateUser";
-    int DEFAULT_INVOICE_AMT = 100;
-    int DEFAULT_TAX_AMT = 108;
-
     Invoice defaultInvoice = new Invoice();
-    defaultInvoice.setInvoiceNo(DEFAULT_INVOICE_NO);
-    defaultInvoice.setInvoiceStatus(DEFAULT_INVOICE_STATUS);
+    defaultInvoice.setInvoiceNo(10000);
+    defaultInvoice.setInvoiceStatus("10");
 
     defaultInvoice.setInvoiceCreateDate(
         Date.from(
             (LocalDate.of(2018, 1, 1).atStartOfDay(ZoneId.systemDefault()).toInstant())));
 
-    defaultInvoice.setInvoiceTitle(DEFAULT_INVOICE_TITLE);
-    defaultInvoice.setInvoiceAmt(DEFAULT_INVOICE_AMT);
-    defaultInvoice.setTaxAmt(DEFAULT_TAX_AMT);
+    defaultInvoice.setInvoiceTitle("testInvoiceTitle");
+    defaultInvoice.setInvoiceAmt(100);
+    defaultInvoice.setTaxAmt(108);
 
     defaultInvoice.setInvoiceStartDate(
         Date.from(
@@ -834,13 +805,13 @@ public class InvoiceServiceTest {
         Date.from(
             (LocalDate.of(2018, 1, 3).atStartOfDay(ZoneId.systemDefault()).toInstant())));
 
-    defaultInvoice.setInvoiceNote(DEFAULT_INVOICE_NOTE);
-    defaultInvoice.setCreateUser(DEFAULT_CREATE_USER);
+    defaultInvoice.setInvoiceNote("testInvoiceNote");
+    defaultInvoice.setCreateUser("testCreateUser");
 
     defaultInvoice.setCreateDatetime(
         Date.from(
             (LocalDate.of(2018, 1, 4).atStartOfDay(ZoneId.systemDefault()).toInstant())));
-    defaultInvoice.setUpdateUser(DEFAULT_UPDATE_USER);
+    defaultInvoice.setUpdateUser("testUpdateUser");
 
     defaultInvoice.setUpdateDatetime(
         Date.from(
@@ -880,18 +851,12 @@ public class InvoiceServiceTest {
    */
   private Order getDefaultOrder() {
 
-    int DEFAULT_ITEM_NO = 500000;
-    String DEFAULT_ITEM_NAME = "itemName";
-    String DEFAULT_ITEM_TYPE = "10";
-    int DEFAULT_ITEM_PRICE = 500;
-    int DEFAULT_ITEM_COUNT = 10;
-
     Order defaultOrder = new Order();
-    defaultOrder.setItemNo(DEFAULT_ITEM_NO);
-    defaultOrder.setItemName(DEFAULT_ITEM_NAME);
-    defaultOrder.setItemType(DEFAULT_ITEM_TYPE);
-    defaultOrder.setItemPrice(DEFAULT_ITEM_PRICE);
-    defaultOrder.setItemCount(DEFAULT_ITEM_COUNT);
+    defaultOrder.setItemNo(500000);
+    defaultOrder.setItemName("itemName");
+    defaultOrder.setItemType("10");
+    defaultOrder.setItemPrice(500);
+    defaultOrder.setItemCount(10);
     defaultOrder.setCreateDatetime(
         Date.from(
             (LocalDate.of(2018, 1, 6).atStartOfDay(ZoneId.systemDefault()).toInstant())));

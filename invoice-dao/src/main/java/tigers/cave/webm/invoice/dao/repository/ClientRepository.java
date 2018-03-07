@@ -10,7 +10,7 @@ import tigers.cave.webm.invoice.dao.model.Client;
 @Repository
 public interface ClientRepository extends JpaRepository<Client, Integer> {
 
-	@Query("SELECT c FROM Client c WHERE c.delFlg = :notDel AND c.clientNo = :clientNo ")
-	Client findByClientNo(@Param("clientNo") int clientNo, @Param("notDel") String delFlg);
+  @Query("SELECT c FROM Client c WHERE c.delFlg = :notDel AND c.clientNo = :clientNo ")
+  Client findByClientNo(@Param("clientNo") int clientNo, @Param("notDel") String delFlg);
 
 }

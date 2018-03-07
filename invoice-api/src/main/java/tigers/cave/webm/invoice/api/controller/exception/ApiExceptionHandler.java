@@ -32,7 +32,22 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
   MessageSource messageSource;
 
   /* (非 Javadoc)
-   * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleExceptionInternal(java.lang.Exception, java.lang.Object, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+   * @see
+   * org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+   * #handleExceptionInternal(
+   *   java.lang.Exception,
+   *   java.lang.Object,
+   *   org.springframework.http.HttpHeaders,
+   *   org.springframework.http.HttpStatus,
+   *   org.springframework.web.context.request.WebRequest)
+   *
+   * 例外クラスが以下の場合、statusの設定とレスポンスボディの設定を行う
+   *
+   * ・HttpMessageNotReadableException
+   * ・HttpMediaTypeNotSupportedException
+   *
+   * ※上記以外はシステムエラーとして扱う
+   *
    */
   @Override
   protected ResponseEntity<Object> handleExceptionInternal(
@@ -68,7 +83,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   /* (非 Javadoc)
-   * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+   * @see
+   * org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+   * #handleMethodArgumentNotValid(
+   *   org.springframework.web.bind.MethodArgumentNotValidException,
+   *   org.springframework.http.HttpHeaders,
+   *   org.springframework.http.HttpStatus,
+   *   org.springframework.web.context.request.WebRequest)
+   *
+   * 例外クラスがMethodArgumentNotValidExceptionの場合、statusの設定とレスポンスボディの設定を行う
+   *
    */
   @Override
   protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -92,7 +116,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   /* (非 Javadoc)
-   * @see org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler#handleBindException(org.springframework.validation.BindException, org.springframework.http.HttpHeaders, org.springframework.http.HttpStatus, org.springframework.web.context.request.WebRequest)
+   * @see
+   * org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+   * #handleBindException(
+   *   org.springframework.validation.BindException,
+   *   org.springframework.http.HttpHeaders,
+   *   org.springframework.http.HttpStatus,
+   *   org.springframework.web.context.request.WebRequest)
+   *
+   * 例外クラスがBindExceptionの場合、statusの設定とレスポンスボディの設定を行う
+   *
    */
   @Override
   protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers,
@@ -115,6 +148,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
   /**
    * Handle constraint violation exception.
+   * 例外クラスがConstraintViolationExceptionの場合、statusの設定とレスポンスボディの設定を行う
    *
    * @param ex the ex
    * @param request the request
@@ -133,7 +167,8 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   /**
-   * Handle application exception.
+   * Handle application exception
+   * 例外クラスがApplicationExceptionの場合、statusの設定とレスポンスボディの設定を行う.
    *
    * @param ae the ae
    * @param request the request
@@ -160,6 +195,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
   /**
    * Handle system exception.
+   * 例外クラスがExceptionの場合、statusの設定とレスポンスボディの設定を行う
    *
    * @param ex the ex
    * @param request the request

@@ -13,6 +13,9 @@ import javax.validation.ReportAsSingleViolation;
 
 import tigers.cave.webm.invoice.api.common.validation.DateTimeCompareValidator;
 
+/**
+ * The Interface DateTimeCompare.
+ */
 @Documented
 @Retention(RUNTIME)
 @Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE, TYPE })
@@ -20,21 +23,55 @@ import tigers.cave.webm.invoice.api.common.validation.DateTimeCompareValidator;
 @ReportAsSingleViolation
 public @interface DateTimeCompare {
 
-	String message() default "{tigers.cave.webm.invoice.api.validation.DateTimeCompare.message}";
+  /**
+   * Message.
+   *
+   * @return the string
+   */
+  String message() default "{tigers.cave.webm.invoice.api.validation.DateTimeCompare.message}";
 
-	Class<?>[] groups() default {};
+  /**
+   * Groups.
+   *
+   * @return the class[]
+   */
+  Class<?>[] groups() default {};
 
-	Class<? extends Payload>[] payload() default {};
+  /**
+   * Payload.
+   *
+   * @return the class<? extends payload>[]
+   */
+  Class<? extends Payload>[] payload() default {};
 
-	String startDay();
+  /**
+   * Start day.
+   *
+   * @return the string
+   */
+  String startDay();
 
-	String endDay();
+  /**
+   * End day.
+   *
+   * @return the string
+   */
+  String endDay();
 
-	@Documented
-	@Retention(RUNTIME)
-	@Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE, TYPE })
-	public @interface List {
-		DateTimeCompare[] value();
-	}
+  /**
+   * The Interface List.
+   */
+  @Documented
+  @Retention(RUNTIME)
+  @Target({ FIELD, METHOD, PARAMETER, CONSTRUCTOR, ANNOTATION_TYPE, TYPE })
+  public @interface List {
+
+    /**
+     * Value.
+     *
+     * @return the date time compare[]
+     */
+    DateTimeCompare[] value();
+  }
 
 }

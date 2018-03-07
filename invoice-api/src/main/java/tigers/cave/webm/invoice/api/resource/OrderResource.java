@@ -10,31 +10,31 @@ import lombok.Data;
 @Data
 public class OrderResource implements Serializable {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 1857878168009982262L;
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 1857878168009982262L;
 
-	/** The item no. */
-	private String itemNo;
+  /** The item no. */
+  private String itemNo;
 
-	/** The item name. */
-	private String itemName;
+  /** The item name. */
+  private String itemName;
 
-	/** The item type code. */
-	private String itemTypeCode;
+  /** The item type code. */
+  private String itemTypeCode;
 
-	/** The item type. */
-	private String itemType;
+  /** The item type. */
+  private String itemType;
 
-	/** The item price. */
-	private String itemPrice;
+  /** The item price. */
+  private String itemPrice;
 
-	/** The item count. */
-	private String itemCount;
+  /** The item count. */
+  private String itemCount;
 
-	/** The create datetime. */
-	private String createDatetime;
+  /** The create datetime. */
+  private String createDatetime;
 
-	/** The update datetime. */
-	private String updateDatetime;
+  /** The update datetime. */
+  private String updateDatetime;
 
 }

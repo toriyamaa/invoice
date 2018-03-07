@@ -11,73 +11,73 @@ import lombok.Data;
 @Data
 public class InvoiceDetailResource implements Serializable {
 
-	/** The Constant serialVersionUID. */
-	private static final long serialVersionUID = 2201705105441530211L;
+  /** The Constant serialVersionUID. */
+  private static final long serialVersionUID = 2201705105441530211L;
 
-	/** The invoice no. */
-	private String invoiceNo;
+  /** The invoice no. */
+  private String invoiceNo;
 
-	/** The client no. */
-	private String clientNo;
+  /** The client no. */
+  private String clientNo;
 
-	/** The client charge name. */
-	private String clientChargeName;
+  /** The client charge name. */
+  private String clientChargeName;
 
-	/** The client name. */
-	private String clientName;
+  /** The client name. */
+  private String clientName;
 
-	/** The client address. */
-	private String clientAddress;
+  /** The client address. */
+  private String clientAddress;
 
-	/** The client tel. */
-	private String clientTel;
+  /** The client tel. */
+  private String clientTel;
 
-	/** The client fax. */
-	private String clientFax;
+  /** The client fax. */
+  private String clientFax;
 
-	/** The invoice status code. */
-	private String invoiceStatusCode;
+  /** The invoice status code. */
+  private String invoiceStatusCode;
 
-	/** The invoice status. */
-	private String invoiceStatus;
+  /** The invoice status. */
+  private String invoiceStatus;
 
-	/** The invoice create date. */
-	private String invoiceCreateDate;
+  /** The invoice create date. */
+  private String invoiceCreateDate;
 
-	/** The invoice title. */
-	private String invoiceTitle;
+  /** The invoice title. */
+  private String invoiceTitle;
 
-	/** The invoice amt. */
-	private String invoiceAmt;
+  /** The invoice amt. */
+  private String invoiceAmt;
 
-	/** The tax amt. */
-	private String taxAmt;
+  /** The tax amt. */
+  private String taxAmt;
 
-	/** The invoice start date. */
-	private String invoiceStartDate;
+  /** The invoice start date. */
+  private String invoiceStartDate;
 
-	/** The invoice end date. */
-	private String invoiceEndDate;
+  /** The invoice end date. */
+  private String invoiceEndDate;
 
-	/** The invoice note. */
-	private String invoiceNote;
+  /** The invoice note. */
+  private String invoiceNote;
 
-	/** The create user. */
-	private String createUser;
+  /** The create user. */
+  private String createUser;
 
-	/** The create datetime. */
-	private String createDatetime;
+  /** The create datetime. */
+  private String createDatetime;
 
-	/** The update user. */
-	private String updateUser;
+  /** The update user. */
+  private String updateUser;
 
-	/** The update datetime. */
-	private String updateDatetime;
+  /** The update datetime. */
+  private String updateDatetime;
 
-	/** The orders count. */
-	private String ordersCount;
+  /** The orders count. */
+  private String ordersCount;
 
-	/** The orders. */
-	private List<OrderResource> orders;
+  /** The orders. */
+  private List<OrderResource> orders;
 
 }

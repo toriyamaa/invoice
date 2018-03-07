@@ -11,15 +11,15 @@ import org.springframework.context.support.ResourceBundleMessageSource;
 @Configuration
 public class AppConfig {
 
-	/**
-	 * Message source.
-	 *
-	 * @return the message source
-	 */
-	@Bean
-	public MessageSource messageSource() {
-		ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
-		messageSource.setBasenames("application-messages");
-		return messageSource;
-	}
+  /**
+   * Message source.
+   *
+   * @return the message source
+   */
+  @Bean
+  public MessageSource messageSource() {
+    ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+    messageSource.setBasenames("application-messages");
+    return messageSource;
+  }
 }

@@ -24,125 +24,125 @@ import javax.persistence.TemporalType;
 @NamedQuery(name = "Order.findAll", query = "SELECT o FROM Order o")
 public class Order implements Serializable {
 
-	private static final long serialVersionUID = -3629855706785177461L;
+  private static final long serialVersionUID = -3629855706785177461L;
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "order_no")
-	private int orderNo;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "order_no")
+  private int orderNo;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "create_datetime")
-	private Date createDatetime;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "create_datetime")
+  private Date createDatetime;
 
-	@Column(name = "del_flg")
-	private String delFlg;
+  @Column(name = "del_flg")
+  private String delFlg;
 
-	@Column(name = "item_count")
-	private int itemCount;
+  @Column(name = "item_count")
+  private int itemCount;
 
-	@Column(name = "item_name")
-	private String itemName;
+  @Column(name = "item_name")
+  private String itemName;
 
-	@Column(name = "item_no")
-	private int itemNo;
+  @Column(name = "item_no")
+  private int itemNo;
 
-	@Column(name = "item_price")
-	private int itemPrice;
+  @Column(name = "item_price")
+  private int itemPrice;
 
-	@Column(name = "item_type")
-	private String itemType;
+  @Column(name = "item_type")
+  private String itemType;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "update_datetime")
-	private Date updateDatetime;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(name = "update_datetime")
+  private Date updateDatetime;
 
-	//bi-directional many-to-one association to Client
-	@ManyToOne
-	@JoinColumn(name = "client_no")
-	private Client clientTbl;
+  //bi-directional many-to-one association to Client
+  @ManyToOne
+  @JoinColumn(name = "client_no")
+  private Client clientTbl;
 
-	public Order() {
-	}
+  public Order() {
+  }
 
-	public int getOrderNo() {
-		return this.orderNo;
-	}
+  public int getOrderNo() {
+    return this.orderNo;
+  }
 
-	public void setOrderNo(int orderNo) {
-		this.orderNo = orderNo;
-	}
+  public void setOrderNo(int orderNo) {
+    this.orderNo = orderNo;
+  }
 
-	public Date getCreateDatetime() {
-		return this.createDatetime;
-	}
+  public Date getCreateDatetime() {
+    return this.createDatetime;
+  }
 
-	public void setCreateDatetime(Date createDatetime) {
-		this.createDatetime = createDatetime;
-	}
+  public void setCreateDatetime(Date createDatetime) {
+    this.createDatetime = createDatetime;
+  }
 
-	public String getDelFlg() {
-		return this.delFlg;
-	}
+  public String getDelFlg() {
+    return this.delFlg;
+  }
 
-	public void setDelFlg(String delFlg) {
-		this.delFlg = delFlg;
-	}
+  public void setDelFlg(String delFlg) {
+    this.delFlg = delFlg;
+  }
 
-	public int getItemCount() {
-		return this.itemCount;
-	}
+  public int getItemCount() {
+    return this.itemCount;
+  }
 
-	public void setItemCount(int itemCount) {
-		this.itemCount = itemCount;
-	}
+  public void setItemCount(int itemCount) {
+    this.itemCount = itemCount;
+  }
 
-	public String getItemName() {
-		return this.itemName;
-	}
+  public String getItemName() {
+    return this.itemName;
+  }
 
-	public void setItemName(String itemName) {
-		this.itemName = itemName;
-	}
+  public void setItemName(String itemName) {
+    this.itemName = itemName;
+  }
 
-	public int getItemNo() {
-		return this.itemNo;
-	}
+  public int getItemNo() {
+    return this.itemNo;
+  }
 
-	public void setItemNo(int itemNo) {
-		this.itemNo = itemNo;
-	}
+  public void setItemNo(int itemNo) {
+    this.itemNo = itemNo;
+  }
 
-	public int getItemPrice() {
-		return this.itemPrice;
-	}
+  public int getItemPrice() {
+    return this.itemPrice;
+  }
 
-	public void setItemPrice(int itemPrice) {
-		this.itemPrice = itemPrice;
-	}
+  public void setItemPrice(int itemPrice) {
+    this.itemPrice = itemPrice;
+  }
 
-	public String getItemType() {
-		return this.itemType;
-	}
+  public String getItemType() {
+    return this.itemType;
+  }
 
-	public void setItemType(String itemType) {
-		this.itemType = itemType;
-	}
+  public void setItemType(String itemType) {
+    this.itemType = itemType;
+  }
 
-	public Date getUpdateDatetime() {
-		return this.updateDatetime;
-	}
+  public Date getUpdateDatetime() {
+    return this.updateDatetime;
+  }
 
-	public void setUpdateDatetime(Date updateDatetime) {
-		this.updateDatetime = updateDatetime;
-	}
+  public void setUpdateDatetime(Date updateDatetime) {
+    this.updateDatetime = updateDatetime;
+  }
 
-	public Client getClientTbl() {
-		return this.clientTbl;
-	}
+  public Client getClientTbl() {
+    return this.clientTbl;
+  }
 
-	public void setClientTbl(Client clientTbl) {
-		this.clientTbl = clientTbl;
-	}
+  public void setClientTbl(Client clientTbl) {
+    this.clientTbl = clientTbl;
+  }
 
 }

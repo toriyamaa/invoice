@@ -13,27 +13,28 @@ import tigers.cave.webm.invoice.api.validation.NumericZeroSuppress;
  * 請求書一覧取得のリクエストパラメータ.
  */
 @Data
-@DateTimeCompare(message = "InvalidRelation", endDay = "invoiceDateMax", startDay = "invoiceDateMin")
+@DateTimeCompare(
+    message = "InvalidRelation", endDay = "invoiceDateMax", startDay = "invoiceDateMin")
 public class InvoiceListResourceQuery implements Serializable {
 
-	private static final long serialVersionUID = -388688920418678467L;
+  private static final long serialVersionUID = -388688920418678467L;
 
-	@NumericZeroSuppress(message = "NotNumber")
-	private String start;
+  @NumericZeroSuppress(message = "NotNumber")
+  private String start;
 
-	@Numeric(message = "NotNumber")
-	private String maxCount;
+  @Numeric(message = "NotNumber")
+  private String maxCount;
 
-	@Numeric(message = "NotNumber")
-	private String clientNo;
+  @Numeric(message = "NotNumber")
+  private String clientNo;
 
-	@InvoiceStatusValid(message = "InvalidInvoiceStatus")
-	private String invoiceStatus;
+  @InvoiceStatusValid(message = "InvalidInvoiceStatus")
+  private String invoiceStatus;
 
-	@DateTimeFormatValid(message = "InvalidDateFormat")
-	private String invoiceDateMin;
+  @DateTimeFormatValid(message = "InvalidDateFormat")
+  private String invoiceDateMin;
 
-	@DateTimeFormatValid(message = "InvalidDateFormat")
-	private String invoiceDateMax;
+  @DateTimeFormatValid(message = "InvalidDateFormat")
+  private String invoiceDateMax;
 
 }

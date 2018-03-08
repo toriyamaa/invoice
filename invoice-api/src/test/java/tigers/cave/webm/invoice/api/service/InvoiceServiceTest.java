@@ -1,9 +1,11 @@
 package tigers.cave.webm.invoice.api.service;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.doReturn;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -238,12 +240,9 @@ public class InvoiceServiceTest {
 
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
-   *
-   *請求書一覧取得の確認.
-   *
+   * 請求書一覧取得の確認.
    * [条件]
    * ・絞り込み条件なし
-   *
    * [結果]
    * ・取得結果０件
    */
@@ -279,12 +278,9 @@ public class InvoiceServiceTest {
 
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
-   *
    * 請求書一覧取得の確認.
-   *
    * [条件]
    * ・絞り込み条件なし
-   *
    * [結果]
    * ・取得結果2件
    */
@@ -382,12 +378,9 @@ public class InvoiceServiceTest {
 
   /**
    * 【findAllInvoicesByCriteriaメソッドのテスト】
-   *
    * 請求書一覧取得の確認.
-   *
    * [条件]
    * ・絞り込み条件すべて指定
-   *
    * [結果]
    * ・取得結果2件
    */
@@ -507,13 +500,11 @@ public class InvoiceServiceTest {
 
   /**
    * 【createInvoiceメソッドのテスト】
-   *
-   * 請求書データ取得失敗時のエラーハンドリング
-   *
+   * 請求書データ取得失敗時のエラーハンドリング.
    * 以下の値を持つApplicationExceptionが返却されること
    * ・NotExist
    * ・messageOption：new String[] {"clientNo"}
-   * ・field：clientNo.
+   * ・field：clientNo
    */
   @Test
   public void testErrCheckCreateInvoice() {
@@ -549,13 +540,11 @@ public class InvoiceServiceTest {
 
   /**
    * 【createInvoiceメソッドのテスト】
-   *
-   * 請求書期間重複時のエラーハンドリング
-   *
+   * 請求書期間重複時のエラーハンドリング.
    * 以下の値を持つApplicationExceptionが返却されること
    * ・InvoiceDuplication
    * ・messageOption：new String[] {}
-   * ・field："".
+   * ・field：""
    */
   @Test
   public void testErrCheckCreateInvoice2() {
@@ -604,13 +593,11 @@ public class InvoiceServiceTest {
 
   /**
    * 【createInvoiceメソッドのテスト】
-   *
-   * 注文実績データ取得失敗時のエラーハンドリング
-   *
+   * 注文実績データ取得失敗時のエラーハンドリング.
    * 以下の値を持つApplicationExceptionが返却されること
    * ・OrderNotExist
    * ・messageOption：new String[] {}
-   * ・field："".
+   * ・field：""
    */
   @Test
   public void testErrCheckCreateInvoice3() {
@@ -669,12 +656,9 @@ public class InvoiceServiceTest {
 
   /**
    * 【createInvoiceメソッドのテスト】
-   *
    * 請求書データ登録の確認.
-   *
    * [条件]
    * ・条件すべて指定
-   *
    * [結果]
    * InvoiceRegistrationResultResourceの以下の項目が期待値であること
    * ・invoiceNo

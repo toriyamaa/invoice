@@ -1,12 +1,14 @@
 package tigers.cave.webm.invoice.api.resource.err;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Data;
+
+
 
 /**
  * エラー発生時のレスポンスボディ.

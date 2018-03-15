@@ -72,14 +72,14 @@ public class DateTimeCompareValidator implements ConstraintValidator<DateTimeCom
         try {
 
           startDateObj = LocalDate.of(
-              Integer.valueOf(mchStart.group(1)),
-              Integer.valueOf(mchStart.group(2)),
-              Integer.valueOf(mchStart.group(3)));
+              Integer.parseInt(mchStart.group(1)),
+              Integer.parseInt(mchStart.group(2)),
+              Integer.parseInt(mchStart.group(3)));
 
           endDateObj = LocalDate.of(
-              Integer.valueOf(mchEnd.group(1)),
-              Integer.valueOf(mchEnd.group(2)),
-              Integer.valueOf(mchEnd.group(3)));
+              Integer.parseInt(mchEnd.group(1)),
+              Integer.parseInt(mchEnd.group(2)),
+              Integer.parseInt(mchEnd.group(3)));
 
         } catch (Exception e) {
           return true;

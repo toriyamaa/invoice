@@ -43,9 +43,9 @@ public class DateTimeFormatValidator implements ConstraintValidator<DateTimeForm
       try {
         //日付の妥当性のチェック
         LocalDate.of(
-            Integer.valueOf(mch.group(1)),
-            Integer.valueOf(mch.group(2)),
-            Integer.valueOf(mch.group(3)));
+            Integer.parseInt(mch.group(1)),
+            Integer.parseInt(mch.group(2)),
+            Integer.parseInt(mch.group(3)));
       } catch (Exception e) {
         return false;
       }
